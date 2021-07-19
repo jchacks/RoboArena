@@ -5,51 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-
-float rand_float(float low, float high)
-{
-    return low + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (high - low)));
-}
-
-template <typename T>
-int sgn(T val)
-{
-    return (T(0) < val) - (val < T(0));
-}
-
-struct Vec2
-{
-    float x;
-    float y;
-    Vec2() : x(0.0f), y(0.0f){};
-    Vec2(float x, float y) : x(x), y(y){};
-    static Vec2 random(float low, float high)
-    {
-        return Vec2(rand_float(low, high), rand_float(low, high));
-    };
-
-    Vec2 operator+(const Vec2 &other) const
-    {
-        return Vec2(x + other.x, y + other.y);
-    };
-
-    Vec2 operator*(const float &scalar) const
-    {
-        return Vec2(x * scalar, y * scalar);
-    };
-
-    Vec2 &operator+=(const Vec2 &other)
-    {
-        x = x + other.x;
-        y = y + other.y;
-        return *this;
-    };
-};
-
-std::ostream &operator<<(std::ostream &strm, const Vec2 &v)
-{
-    return strm << "Vec2(" << v.x << "," << v.y << ")";
-}
+#include <utils.h>
 
 class Robot
 {
@@ -57,18 +13,25 @@ public:
     char moving;
     char turning;
     float speed;
+    float target_speed;
     float energy;
 
     Vec2 position;
     float base_rads;
+    float base_rads_speed;
+    float turret_rads;
+    float turret_rads_speed;
+
     Robot()
     {
         energy = 100;
         speed = 1;
         moving = 1;
-        turning = 0;
+        target_speed = 4;
+        turning = 1;
         position = Vec2::random(0.0f, 10.0f);
-        base_rads = 1.0f;
+        base_rads = rand_float(0.0f, 2.0f);
+        turret_rads = base_rads;
     };
 
     Vec2 direction() const
@@ -79,19 +42,17 @@ public:
     float acceleration() const
     {
         int sspeed = sgn<float>(speed);
-        int smove = sgn<float>(moving);
-        // 1 if same direction 0 if moving or speed is zero, -1 if opposite
-        switch (sspeed * smove)
-        {
-        case 1:
-            return 1.0f;
-        case -1:
-            return -2.0f;
-        case 0:
-            return 1.0f * smove;
-        default:
-            return 0;
-        }
+        int starget = sgn<float>(target_speed);
+        float co_speed = static_cast<float>(sspeed * starget);
+        debug<float>(co_speed);
+        // sspeed and starget are  1 ->  1
+        // sspeed and starget are -1 -> -2
+        // sspeed and starget are  0 -> 
+        //      starget is 0 -> -2
+        //      sspeed is  0 -> 1
+
+        return std::max(0.0f, co_speed) - std::max(0.0f, 2 * co_speed) +
+            static_cast<float>((1 - std::abs(sspeed)) + -2 * (1 - std::abs(starget)));
     }
 
     void init(){
@@ -101,7 +62,8 @@ public:
     void update()
     {
         speed += acceleration();
-        speed = std::max(-8.0f, std::min(8.0f, speed));
+
+        speed = clip(speed, -8.0f, 8.0f);
         position += direction() * speed;
     };
 };
@@ -109,21 +71,31 @@ public:
 std::ostream &operator<<(std::ostream &strm, const Robot &r)
 {
     return strm << "Robot("
-                << r.position << ","
-                << r.direction() << ","
-                << r.speed << ")";
+                << "energy=" << r.energy << ","
+                << "position=" << r.position << ","
+                << "direction=" << r.direction() << ","
+                << "speed=" << r.speed << ")";
 }
 
 class Engine
 {
 public:
     std::vector<Robot> robots;
+    Vec2 size;
+
+    Engine(Vec2 size) : size(size) {}
+
+    void collide_walls(Robot &robot)
+    {
+        robot.position.clip(Vec2(0.0f, 0.0f), size);
+    }
 
     void update()
     {
         for (std::vector<Robot>::iterator it = robots.begin(); it != robots.end(); it++)
         {
             it->update();
+            collide_walls(*it);
             std::cout << "Updated " << *it << std::endl;
         }
     }
@@ -133,10 +105,10 @@ int main()
 {
     std::srand(std::time(nullptr));
 
-    Engine engine = Engine();
+    Engine engine = Engine(Vec2(200.0f, 100.0f));
     Robot r = Robot();
     engine.robots.push_back(r);
-    int i = 100;
+    int i = 1000;
     auto start = std::chrono::high_resolution_clock::now();
     while (i >= 0)
     {
@@ -144,7 +116,8 @@ int main()
         i -= 1;
     }
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "Duration " << duration.count() << std::endl;
 
     return 0;
 }
