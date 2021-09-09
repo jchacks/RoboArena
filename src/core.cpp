@@ -28,7 +28,7 @@ void Engine::collide_bullets()
         // Test outofbounds
         if (test_circle_oob((*it_bullet)->position, 3))
         {
-            log("Bullet hit wall");
+            TRACE("Bullet hit wall");
             delete *it_bullet;
             bullets.erase(it_bullet);
             it_bullet++;
@@ -41,7 +41,7 @@ void Engine::collide_bullets()
         {
             if (test_circle_to_circle((*it_robot)->position, Robot::RADIUS, (*it_bullet)->position, 3))
             {
-                log("Bullet hit tank");
+                TRACE("Bullet hit tank");
                 float power = (*it_bullet)->power;
                 (*it_robot)->energy -= 4.0f * +((power >= 1) * 2.0f * (power - 1.0f));
 
@@ -67,7 +67,7 @@ void Engine::step()
         robot.step();
         if (test_circle_oob(robot.position, Robot::RADIUS))
         {
-            log("Robot collided with wall.");
+            TRACE("Robot collided with wall.");
         }
     }
 };
@@ -83,7 +83,7 @@ Bullet *Robot::fire()
     energy = std::max(0.0f, energy - fire_power);
     should_fire = false;
     Vec2 turret_direction = Vec2::from_rads(turret_rotation);
-    log("Firing");
+    TRACE("Firing");
     return new Bullet(
         this,
         position + turret_direction * 30.0f,

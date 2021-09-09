@@ -7,6 +7,7 @@
 #include <set>
 
 #include "vec2.h"
+#include "log.h"
 
 static unsigned long NUMBER_ROBOTS = 0;
 
@@ -20,7 +21,6 @@ const float RADAR_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 const float BULLET_MAX_POWER = 3.0;
 const float BULLET_MIN_POWER = 0.1;
 const float ROBOT_RADIUS = 24;
-
 
 class Bullet
 {
@@ -36,7 +36,7 @@ public:
           velocity(Vec2(0.0, 0.0)),
           power(0)
     {
-        log("default constructor");
+        TRACE("default constructor {}", this);
     };
     Bullet(Robot *owner, Vec2 position, Vec2 velocity, float power)
         : owner(owner),
@@ -44,22 +44,21 @@ public:
           velocity(velocity),
           power(power)
     {
-        log("constructor");
+        TRACE("constructor {}", this);
     };
 
     ~Bullet()
     {
-        log("destructor");
+        TRACE("destructor {}", this);
     };
     void step();
 
     bool operator>(const Bullet &other) const;
     bool operator<(const Bullet &other) const;
 
-private:
-    void log(const char *msg)
+    friend std::ostream &operator<<(std::ostream &strm, const Bullet &b)
     {
-        std::cout << "Bullet[" << this << "] " << msg << std::endl;
+        return strm << "Bullet[owner=" << b.owner << ",pos=" << b.position << ",pow=" << b.power << "] ";
     }
 };
 
@@ -103,12 +102,12 @@ public:
           should_fire(false),
           fire_power(0.0)
     {
-        log("constructor");
+        TRACE("constructor {}", this);
     };
 
     ~Robot()
     {
-        log("destructor");
+        TRACE("destructor {}", this);
     };
 
     void step();
@@ -116,10 +115,9 @@ public:
     Vec2 get_velocity();
     Bullet *fire();
 
-private:
-    void log(const char *msg)
+    friend std::ostream &operator<<(std::ostream &strm, const Robot &r)
     {
-        std::cout << "Robot[" << this << "] " << msg << std::endl;
+        return strm << "Robot[uid=" << r.uid << ",energy=" << r.energy << ",pos=" << r.position << ",direction=" << r.base_rotation << "] ";
     }
 };
 
@@ -145,10 +143,5 @@ public:
     void run(); // Is this needed?
 
 private:
-    void log(const char *msg)
-    {
-        std::cout << "Engine[" << this << "] " << msg << std::endl;
-    }
-
     bool test_circle_oob(const Vec2 &c, const float r) const;
 };
