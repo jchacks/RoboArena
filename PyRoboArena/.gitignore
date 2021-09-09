@@ -1,2 +1,6 @@
+# directories
+*.egg-info/
+
+# generated file types
 *.html
 *.cpp

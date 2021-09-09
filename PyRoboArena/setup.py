@@ -8,8 +8,8 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 
 robo_arena = Extension(
-    "engine",
-    sources=["src/engine.pyx"],
+    "RoboArena",
+    sources=["src/RoboArena.pyx"],
     libraries=["RoboArena"],
     library_dirs=["lib"],
     include_dirs=[

@@ -3,8 +3,7 @@
 cimport cython
 from cython.operator cimport dereference as deref, preincrement as inc
 
-# cimport RoboArena
-from RoboArena cimport Vec2, Bullet, Robot, ROBOT_RADIUS, rand_float, Engine as CEngine, clip
+from wrapper cimport Vec2, Bullet, Robot, ROBOT_RADIUS, rand_float, Engine as CEngine, clip
 
 from libc.math cimport sin, cos, abs, pi, pow, pi
 from libcpp.set cimport set as c_set
