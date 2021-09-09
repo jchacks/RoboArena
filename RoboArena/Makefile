@@ -12,15 +12,15 @@ endif
 
 ifeq ($(config),debug)
   RESCOMP = windres
-  TARGETDIR = .
+  TARGETDIR = ../bin/Debug-linux-x86_64/RoboArena
   TARGET = $(TARGETDIR)/libRoboArena.a
-  OBJDIR = obj/Debug
+  OBJDIR = ../obj/Debug-linux-x86_64/RoboArena
   DEFINES += -DDEBUG
   INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++17
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
@@ -31,6 +31,9 @@ ifeq ($(config),debug)
   define PRELINKCMDS
   endef
   define POSTBUILDCMDS
+	@echo Running postbuild commands
+	cp -rf ../bin/Debug-linux-x86_64/RoboArena/libRoboArena.a ../bin/Debug-linux-x86_64/PyRoboArena
+	cd PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
 	@:
@@ -39,15 +42,15 @@ endif
 
 ifeq ($(config),release)
   RESCOMP = windres
-  TARGETDIR = .
+  TARGETDIR = ../bin/Release-linux-x86_64/RoboArena
   TARGET = $(TARGETDIR)/libRoboArena.a
-  OBJDIR = obj/Release
+  OBJDIR = ../obj/Release-linux-x86_64/RoboArena
   DEFINES += -DNDEBUG
   INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
@@ -58,6 +61,9 @@ ifeq ($(config),release)
   define PRELINKCMDS
   endef
   define POSTBUILDCMDS
+	@echo Running postbuild commands
+	cp -rf ../bin/Release-linux-x86_64/RoboArena/libRoboArena.a ../bin/Release-linux-x86_64/PyRoboArena
+	cd PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
 	@:

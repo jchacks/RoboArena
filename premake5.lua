@@ -9,18 +9,23 @@ project "RoboArena"
     location "RoboArena"
     kind "StaticLib" --"ConsoleApp"
     language "C++"
-    cppdialect "C++17"
 
-    targetdir ("bin/" .. outputdir .. "/%{prj.location}")
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
     files {
-       "%{prj.location}/src/**.h",
-       "%{prj.location}/src/**.cpp"
+       "%{prj.name}/src/**.h",
+       "%{prj.name}/src/**.cpp"
     }
 
     includedirs {
-        "%{prj.location}/vendor/spdlog/include",
+        "%{prj.name}/vendor/spdlog/include",
         "/usr/include/python3.8/"
+    }
+
+    postbuildcommands {
+        ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/PyRoboArena"),
+        ("cd PyRoboArena && python setup.py build_ext --inplace")
     }
 
     filter "configurations:Debug"
