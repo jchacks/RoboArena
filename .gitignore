@@ -4,8 +4,11 @@
 .vscode/
 
 #  build
-build/*
-obj/*
+build/
+obj/
 
 #  binaries
-bin/*
+bin/
+
+*.so
+*.a

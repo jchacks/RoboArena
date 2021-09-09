@@ -6,17 +6,20 @@ workspace "RoboArena"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 project "RoboArena"
-    kind "ConsoleApp"
+    location "RoboArena"
+    kind "StaticLib" --"ConsoleApp"
     language "C++"
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    cppdialect "C++17"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.location}")
 
     files {
-       "src/**.h",
-       "src/**.cpp"
+       "%{prj.location}/src/**.h",
+       "%{prj.location}/src/**.cpp"
     }
 
     includedirs {
-        "vendor/spdlog/include",
+        "%{prj.location}/vendor/spdlog/include",
         "/usr/include/python3.8/"
     }
 

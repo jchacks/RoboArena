@@ -24,11 +24,11 @@ all: $(PROJECTS)
 RoboArena:
 ifneq (,$(RoboArena_config))
 	@echo "==== Building RoboArena ($(RoboArena_config)) ===="
-	@${MAKE} --no-print-directory -C . -f RoboArena.make config=$(RoboArena_config)
+	@${MAKE} --no-print-directory -C RoboArena -f Makefile config=$(RoboArena_config)
 endif
 
 clean:
-	@${MAKE} --no-print-directory -C . -f RoboArena.make clean
+	@${MAKE} --no-print-directory -C RoboArena -f Makefile clean
 
 help:
 	@echo "Usage: make [config=name] [target]"
