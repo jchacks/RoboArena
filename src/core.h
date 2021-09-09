@@ -8,7 +8,7 @@
 
 #include "vec2.h"
 
-unsigned long NUMBER_ROBOTS = 0;
+static unsigned long NUMBER_ROBOTS = 0;
 
 const float PI_2f32 = 2.0f * M_PIf32;
 

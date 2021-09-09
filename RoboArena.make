@@ -66,6 +66,7 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/core.o \
+	$(OBJDIR)/entrypoint.o \
 	$(OBJDIR)/log.o \
 	$(OBJDIR)/vec2.o \
 
@@ -127,6 +128,9 @@ $(OBJECTS): | $(OBJDIR)
 endif
 
 $(OBJDIR)/core.o: src/core.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/entrypoint.o: src/entrypoint.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/log.o: src/log.cpp

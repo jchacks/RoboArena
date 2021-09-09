@@ -1,6 +1,11 @@
+# directories
+#  editor
 .idea/
 .vscode/
 
-main.dSYM/*
-
+#  build
 build/*
+obj/*
+
+#  binaries
+bin/*

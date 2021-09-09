@@ -1,21 +1,19 @@
-#include "core.h"
 #include <math.h>
 #include <iostream>
 #include <list>
 #include <set>
 
+#include "core.h"
+#include "log.h"
+
 // https://stackoverflow.com/questions/55302321/calling-a-python-class-method-from-c-if-given-an-initialised-class-as-pyobjec
 // Not sure that this should be here and if this module is not called in
 // PyObject *stop_name = PyUnicode_InternFromString("stop");
-
-
-
 
 bool test_circle_to_circle(const Vec2 c1, float r1, const Vec2 c2, float r2)
 {
     return (c1 - c2).pow(2).sum() <= pow((r1 + r2), 2);
 };
-
 
 bool Engine::test_circle_oob(const Vec2 &c, const float r) const
 {
