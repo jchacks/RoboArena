@@ -16,4 +16,3 @@ struct Ray {
 };
 
 Vec2 intersect(Ray ray, Rect rect);
-

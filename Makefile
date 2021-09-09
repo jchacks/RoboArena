@@ -17,7 +17,7 @@ endif
 
 PROJECTS := RoboArena
 
-.PHONY: all clean help $(PROJECTS) 
+.PHONY: all clean help $(PROJECTS)
 
 all: $(PROJECTS)
 
