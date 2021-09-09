@@ -1,9 +1,10 @@
 -- premake5.lua
 workspace "RoboArena"
+   architecture "x64"
    configurations { "Debug", "Release" }
 
 project "RoboArena"
-   kind "ConsoleApp"
+   kind "SharedLib"
    language "C++"
    targetdir "bin/%{cfg.buildcfg}"
 
