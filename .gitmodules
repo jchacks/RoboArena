@@ -1,3 +1,0 @@
-[submodule "RoboArena/vendor/spdlog"]
-	path = RoboArena/vendor/spdlog
-	url = https://github.com/gabime/spdlog.git
