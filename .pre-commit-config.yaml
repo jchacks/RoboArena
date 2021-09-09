@@ -4,4 +4,6 @@ repos:
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
+        exclude: '(Makefile)|(.*\.make)'
     -   id: trailing-whitespace
+        exclude: '(Makefile)|(.*\.make)'
