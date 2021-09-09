@@ -1,6 +1,6 @@
-#pragma once 
+#pragma once
 
-#include <Python.h>
+// #include <Python.h>
 #include <ostream>
 #include <math.h>
 #include <list>
@@ -21,13 +21,6 @@ const float BULLET_MAX_POWER = 3.0;
 const float BULLET_MIN_POWER = 0.1;
 const float ROBOT_RADIUS = 24;
 
-const bool DEBUG = 0;
-
-void log_message(const char *msg)
-{
-    if (DEBUG == 1)
-        std::cout << msg << std::endl;
-};
 
 class Bullet
 {
@@ -66,15 +59,14 @@ public:
 private:
     void log(const char *msg)
     {
-        if (DEBUG == 1)
-            std::cout << "Bullet[" << this << "] " << msg << std::endl;
+        std::cout << "Bullet[" << this << "] " << msg << std::endl;
     }
 };
 
 class Robot
 {
 public:
-    PyObject *scripted_robot = NULL;
+    // PyObject *scripted_robot = NULL;
 
     static const float RADIUS;
 
@@ -127,8 +119,7 @@ public:
 private:
     void log(const char *msg)
     {
-        if (DEBUG == 1)
-            std::cout << "Robot[" << this << "] " << msg << std::endl;
+        std::cout << "Robot[" << this << "] " << msg << std::endl;
     }
 };
 
@@ -156,7 +147,8 @@ public:
 private:
     void log(const char *msg)
     {
-        if (DEBUG == 1)
-            std::cout << "Engine[" << this << "] " << msg << std::endl;
+        std::cout << "Engine[" << this << "] " << msg << std::endl;
     }
+
+    bool test_circle_oob(const Vec2 &c, const float r) const;
 };

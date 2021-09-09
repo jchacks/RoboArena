@@ -9,14 +9,17 @@
 // PyObject *stop_name = PyUnicode_InternFromString("stop");
 
 
-bool test_cirle_oob(const Vec2 &c, const float r, const Vec2 &size)
-{
-    return !((r < c.x) & (c.x < size.x - r) & (r < c.y) & (c.y < size.y - r));
-};
+
 
 bool test_circle_to_circle(const Vec2 c1, float r1, const Vec2 c2, float r2)
 {
     return (c1 - c2).pow(2).sum() <= pow((r1 + r2), 2);
+};
+
+
+bool Engine::test_circle_oob(const Vec2 &c, const float r) const
+{
+    return !((r < c.x) & (c.x < size.x - r) & (r < c.y) & (c.y < size.y - r));
 };
 
 void Engine::collide_bullets()
@@ -25,7 +28,7 @@ void Engine::collide_bullets()
     while (it_bullet != bullets.end())
     {
         // Test outofbounds
-        if (test_cirle_oob((*it_bullet)->position, 3, size))
+        if (test_circle_oob((*it_bullet)->position, 3))
         {
             log("Bullet hit wall");
             delete *it_bullet;
@@ -64,7 +67,7 @@ void Engine::step()
     {
         Robot &robot = **it;
         robot.step();
-        if (test_cirle_oob(robot.position, Robot::RADIUS, size))
+        if (test_circle_oob(robot.position, Robot::RADIUS))
         {
             log("Robot collided with wall.");
         }

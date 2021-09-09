@@ -1,9 +1,11 @@
-#include <vec2.h>
 #include <math.h>
 #include <stdlib.h>
 #include <chrono>
 #include <random>
 #include <ostream>
+
+#include "vec2.h"
+
 
 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 std::default_random_engine generator(seed);
