@@ -32,8 +32,9 @@ ifeq ($(config),debug)
   endef
   define POSTBUILDCMDS
 	@echo Running postbuild commands
-	cp -rf ../bin/Debug-linux-x86_64/RoboArena/libRoboArena.a ../bin/Debug-linux-x86_64/PyRoboArena
-	cd PyRoboArena && python setup.py build_ext --inplace
+	cp -rf ../bin/Debug-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
+	pwd
+	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
 	@:
@@ -62,8 +63,9 @@ ifeq ($(config),release)
   endef
   define POSTBUILDCMDS
 	@echo Running postbuild commands
-	cp -rf ../bin/Release-linux-x86_64/RoboArena/libRoboArena.a ../bin/Release-linux-x86_64/PyRoboArena
-	cd PyRoboArena && python setup.py build_ext --inplace
+	cp -rf ../bin/Release-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
+	pwd
+	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
 	@:

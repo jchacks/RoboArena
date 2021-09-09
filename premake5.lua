@@ -24,8 +24,8 @@ project "RoboArena"
     }
 
     postbuildcommands {
-        ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/PyRoboArena"),
-        ("cd PyRoboArena && python setup.py build_ext --inplace")
+        ("{COPY} %{cfg.buildtarget.relpath} ../PyRoboArena/lib"),
+        ("cd ../PyRoboArena && python setup.py build_ext --inplace"),
     }
 
     filter "configurations:Debug"
