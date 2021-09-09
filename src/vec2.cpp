@@ -87,11 +87,6 @@ Vec2 &Vec2::operator+=(const Vec2 &other)
     return *this;
 };
 
-std::ostream &operator<<(std::ostream &strm, const Vec2 &v)
-{
-    return strm << "(" << v.x << "," << v.y << ")";
-}
-
 float clip(float clip, float min, float max)
 {
     return std::max(min, std::min(max, clip));

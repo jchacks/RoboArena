@@ -16,7 +16,8 @@ project "RoboArena"
     }
 
     includedirs {
-        "vendor/spdlog/include"
+        "vendor/spdlog/include",
+        "/usr/include/python3.8/"
     }
 
     filter "configurations:Debug"

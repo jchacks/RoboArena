@@ -1,6 +1,6 @@
 #pragma once
 
-// #include <Python.h>
+#include <Python.h>
 #include <ostream>
 #include <math.h>
 #include <list>
@@ -36,7 +36,7 @@ public:
           velocity(Vec2(0.0, 0.0)),
           power(0)
     {
-        TRACE("default constructor {}", this);
+        TRACE("default constructor {}", (long)this);
     };
     Bullet(Robot *owner, Vec2 position, Vec2 velocity, float power)
         : owner(owner),
@@ -44,12 +44,12 @@ public:
           velocity(velocity),
           power(power)
     {
-        TRACE("constructor {}", this);
+        TRACE("constructor {}", (long)this);
     };
 
     ~Bullet()
     {
-        TRACE("destructor {}", this);
+        TRACE("destructor {}", (long)this);
     };
     void step();
 
@@ -58,14 +58,14 @@ public:
 
     friend std::ostream &operator<<(std::ostream &strm, const Bullet &b)
     {
-        return strm << "Bullet[owner=" << b.owner << ",pos=" << b.position << ",pow=" << b.power << "] ";
+        return strm << "Bullet[owner=" << b.owner << ",pos=" << b.position << ",pow=" << b.power << "]";
     }
 };
 
 class Robot
 {
 public:
-    // PyObject *scripted_robot = NULL;
+    PyObject *scripted_robot = NULL;
 
     static const float RADIUS;
 
@@ -102,12 +102,12 @@ public:
           should_fire(false),
           fire_power(0.0)
     {
-        TRACE("constructor {}", this);
+        TRACE("constructor {}", (long)this);
     };
 
     ~Robot()
     {
-        TRACE("destructor {}", this);
+        TRACE("destructor {}", (long)this);
     };
 
     void step();
@@ -117,7 +117,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &strm, const Robot &r)
     {
-        return strm << "Robot[uid=" << r.uid << ",energy=" << r.energy << ",pos=" << r.position << ",direction=" << r.base_rotation << "] ";
+        return strm << "Robot[uid=" << r.uid << ",energy=" << r.energy << ",pos=" << r.position << ",direction=" << r.base_rotation << "]";
     }
 };
 

@@ -16,7 +16,7 @@ ifeq ($(config),debug)
   TARGET = $(TARGETDIR)/RoboArena
   OBJDIR = obj/Debug
   DEFINES += -DDEBUG
-  INCLUDES += -Ivendor/spdlog/include
+  INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
@@ -43,7 +43,7 @@ ifeq ($(config),release)
   TARGET = $(TARGETDIR)/RoboArena
   OBJDIR = obj/Release
   DEFINES += -DNDEBUG
-  INCLUDES += -Ivendor/spdlog/include
+  INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2

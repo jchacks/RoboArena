@@ -33,10 +33,9 @@ struct Vec2
     Vec2 operator/(const float &other) const;
     Vec2 &operator+=(const Vec2 &other);
 
-private:
-    void log(const char *msg)
+    friend std::ostream &operator<<(std::ostream &strm, const Vec2 &v)
     {
-        std::cout << "Vec2[" << this << "] " << msg << std::endl;
+        return strm << "V2(" << v.x << "," << v.y << ")";
     }
 };
 
