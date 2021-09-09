@@ -6,8 +6,8 @@ TARGET_EXEC := main
 BUILD_DIR := ./build
 SRC_DIRS := ./src
 
-LIBRARIES := -framework GLUT -framework OpenGL
-LDFLAGS := $(LIBRARIES) -lobjc -lm
+LIBRARIES := 
+LDFLAGS := $(LIBRARIES) -lm
 
 CFLAGS = -Wall -ggdb -O3 $(INCLUDES)
 CXXFLAGS = -Wall -stdlib=libc++ -ggdb -O3 $(INCLUDES)
