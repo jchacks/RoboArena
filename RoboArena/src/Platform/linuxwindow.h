@@ -14,6 +14,8 @@ public:
     inline unsigned int get_width() const override { return m_data.width; };
     inline unsigned int get_height() const override { return m_data.height; };
 
+    // window attrs
+    inline void set_event_callback(const EventCallbackFn& callback) override { m_data.EventCallback = callback; }
     void set_vsync(bool enabled) override;
     bool is_vsync() const override;
 
@@ -29,6 +31,8 @@ private:
         std::string title;
         unsigned int width, height;
         bool vsync;
+
+        EventCallbackFn EventCallback;
     };
     WindowData m_data;
 };

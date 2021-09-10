@@ -1,7 +1,7 @@
 #include "rapch.h"
 #include "application.h"
 
-// #include "Events/ApplicationEvent.h"
+#include "Events/application.h"
 
 #include <GLFW/glfw3.h>
 
@@ -16,6 +16,8 @@ Application::~Application()
 
 void Application::run()
 {
+    WindowResizeEvent wre = WindowResizeEvent(128,128);
+    INFO(wre);
     while (m_running)
     {
         glClearColor(1, 0, 1, 1);

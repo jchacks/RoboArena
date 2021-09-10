@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <memory>
 
@@ -9,5 +7,6 @@
 #include <functional>
 #include <list>
 #include <set>
+#include <sstream>
 
 #include "RoboArena/log.h"

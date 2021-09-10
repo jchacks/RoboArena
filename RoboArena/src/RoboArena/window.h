@@ -3,8 +3,9 @@
 #include "rapch.h"
 
 #include "RoboArena/core.h"
-// #include "RoboArena/Events/Event.h"
+#include "RoboArena/Events/event.h"
 
+// TODO why is this separate from the WindowData struct in linuxwindow
 struct WindowProps
 {
     std::string title;
@@ -21,9 +22,9 @@ struct WindowProps
 class Window
 {
 public:
-    // using EventCallbackFn = std::function<void(Event&)>;
+    using EventCallbackFn = std::function<void(Event&)>;
 
-    virtual ~Window() {}
+    virtual ~Window() {};
 
     virtual void on_update() = 0;
 
@@ -31,7 +32,7 @@ public:
     virtual unsigned int get_height() const = 0;
 
     // Window attributes
-    // virtual void set_event_callback(const EventCallbackFn& callback) = 0;
+    virtual void set_event_callback(const EventCallbackFn& callback) = 0;
     virtual void set_vsync(bool enabled) = 0;
     virtual bool is_vsync() const = 0;
 
