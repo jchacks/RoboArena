@@ -5,6 +5,14 @@ workspace "RoboArena"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+
+include_directories = {}
+include_directories["Python"] = "/usr/include/python3.8/"
+include_directories["spdlog"] = "RoboArena//vendor/spdlog/include"
+include_directories["GLFW"] = "RoboArena/vendor/GLFW/include"
+--Include other premake
+include "RoboArena/vendor/GLFW"
+
 project "RoboArena"
     location "RoboArena"
     kind "ConsoleApp"
@@ -19,15 +27,26 @@ project "RoboArena"
        "%{prj.location}/src/**.h",
        "%{prj.location}/src/**.cpp"
     }
+    defines {
+		"_CRT_SECURE_NO_WARNINGS",
+	}
 
     includedirs {
         "%{prj.location}/src",
-        "%{prj.location}/vendor/spdlog/include",
-        "/usr/include/python3.8/"
+        "%{include_directories.spdlog}",
+        "%{include_directories.Python}",
+        "%{include_directories.GLFW}",
+    }
+
+    links {
+        "GLFW",
+        "GL",
+        "dl",
+        "pthread"
     }
 
     filter "configurations:Debug"
-        defines { "DEBUG" }
+        defines { "DEBUG", "RA_ENABLE_ASSERTS" }
         symbols "On"
 
     filter "configurations:Release"

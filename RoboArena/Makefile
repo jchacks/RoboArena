@@ -17,15 +17,15 @@ ifeq ($(config),debug)
   OBJDIR = ../obj/Debug-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DDEBUG -DRA_ENABLE_ASSERTS
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
-  LDDEPS +=
+  LIBS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -46,15 +46,15 @@ ifeq ($(config),release)
   OBJDIR = ../obj/Release-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
-  LDDEPS +=
+  LIBS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -75,15 +75,15 @@ ifeq ($(config),python)
   OBJDIR = ../obj/Python-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
-  LDDEPS +=
+  LIBS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
   define PREBUILDCMDS
@@ -101,8 +101,10 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/linuxwindow.o \
 	$(OBJDIR)/engine.o \
 	$(OBJDIR)/robot.o \
+	$(OBJDIR)/application.o \
 	$(OBJDIR)/entrypoint.o \
 	$(OBJDIR)/log.o \
 	$(OBJDIR)/vec2.o \
@@ -164,10 +166,16 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/linuxwindow.o: src/Platform/linuxwindow.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/engine.o: src/RoboArena/Engine/engine.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/robot.o: src/RoboArena/Engine/robot.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/application.o: src/RoboArena/application.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/entrypoint.o: src/RoboArena/entrypoint.cpp
