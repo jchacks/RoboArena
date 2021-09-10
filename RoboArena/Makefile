@@ -13,11 +13,13 @@ endif
 ifeq ($(config),debug)
   RESCOMP = windres
   TARGETDIR = ../bin/Debug-linux-x86_64/RoboArena
-  TARGET = $(TARGETDIR)/libRoboArena.a
+  TARGET = $(TARGETDIR)/RoboArena
   OBJDIR = ../obj/Debug-linux-x86_64/RoboArena
+  PCH = src/rapch.h
+  GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES += -DDEBUG
-  INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
-  FORCE_INCLUDE +=
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
@@ -25,16 +27,12 @@ ifeq ($(config),debug)
   LIBS +=
   LDDEPS +=
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
-  LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
   define PRELINKCMDS
   endef
   define POSTBUILDCMDS
-	@echo Running postbuild commands
-	cp -rf ../bin/Debug-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
-	pwd
-	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
 	@:
@@ -44,11 +42,42 @@ endif
 ifeq ($(config),release)
   RESCOMP = windres
   TARGETDIR = ../bin/Release-linux-x86_64/RoboArena
-  TARGET = $(TARGETDIR)/libRoboArena.a
+  TARGET = $(TARGETDIR)/RoboArena
   OBJDIR = ../obj/Release-linux-x86_64/RoboArena
+  PCH = src/rapch.h
+  GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES += -DNDEBUG
-  INCLUDES += -Ivendor/spdlog/include -I/usr/include/python3.8
-  FORCE_INCLUDE +=
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS +=
+  LDDEPS +=
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),python)
+  RESCOMP = windres
+  TARGETDIR = ../bin/Python-linux-x86_64/RoboArena
+  TARGET = $(TARGETDIR)/libRoboArena.a
+  OBJDIR = ../obj/Python-linux-x86_64/RoboArena
+  PCH = src/rapch.h
+  GCH = $(OBJDIR)/$(notdir $(PCH)).gch
+  DEFINES += -DNDEBUG
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8
+  FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
@@ -63,8 +92,7 @@ ifeq ($(config),release)
   endef
   define POSTBUILDCMDS
 	@echo Running postbuild commands
-	cp -rf ../bin/Release-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
-	pwd
+	cp -rf ../bin/Python-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
 	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)
@@ -73,7 +101,8 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/core.o \
+	$(OBJDIR)/engine.o \
+	$(OBJDIR)/robot.o \
 	$(OBJDIR)/entrypoint.o \
 	$(OBJDIR)/log.o \
 	$(OBJDIR)/vec2.o \
@@ -135,16 +164,19 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/core.o: src/core.cpp
+$(OBJDIR)/engine.o: src/RoboArena/Engine/engine.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/entrypoint.o: src/entrypoint.cpp
+$(OBJDIR)/robot.o: src/RoboArena/Engine/robot.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/log.o: src/log.cpp
+$(OBJDIR)/entrypoint.o: src/RoboArena/entrypoint.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vec2.o: src/vec2.cpp
+$(OBJDIR)/log.o: src/RoboArena/log.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/vec2.o: src/RoboArena/vec2.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

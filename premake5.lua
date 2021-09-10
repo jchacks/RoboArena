@@ -1,31 +1,29 @@
 -- premake5.lua
 workspace "RoboArena"
    architecture "x64"
-   configurations { "Debug", "Release" }
+   configurations { "Debug", "Release", "Python" }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 project "RoboArena"
     location "RoboArena"
-    kind "StaticLib" --"ConsoleApp"
+    kind "ConsoleApp"
     language "C++"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "rapch.h"
+
     files {
-       "%{prj.name}/src/**.h",
-       "%{prj.name}/src/**.cpp"
+       "%{prj.location}/src/**.h",
+       "%{prj.location}/src/**.cpp"
     }
 
     includedirs {
-        "%{prj.name}/vendor/spdlog/include",
+        "%{prj.location}/src",
+        "%{prj.location}/vendor/spdlog/include",
         "/usr/include/python3.8/"
-    }
-
-    postbuildcommands {
-        ("{COPY} %{cfg.buildtarget.relpath} ../PyRoboArena/lib"),
-        ("cd ../PyRoboArena && python setup.py build_ext --inplace"),
     }
 
     filter "configurations:Debug"
@@ -35,3 +33,13 @@ project "RoboArena"
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
+
+    filter "configurations:Python"
+        kind "StaticLib"
+        defines { "NDEBUG" }
+        optimize "On"
+
+        postbuildcommands {
+            ("{COPY} %{cfg.buildtarget.relpath} ../PyRoboArena/lib"),
+            ("cd ../PyRoboArena && python setup.py build_ext --inplace"),
+        }

@@ -1,4 +1,5 @@
-#include "log.h"
+#include "rapch.h"
+#include "RoboArena/log.h"
 
 std::shared_ptr<spdlog::logger> Log::s_Logger;
 

@@ -1,10 +1,9 @@
-#include <math.h>
-#include <stdlib.h>
+#include "rapch.h"
+
 #include <chrono>
 #include <random>
-#include <ostream>
 
-#include "vec2.h"
+#include "RoboArena/vec2.h"
 
 
 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();

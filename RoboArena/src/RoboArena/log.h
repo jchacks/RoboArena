@@ -4,6 +4,7 @@
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/fmt/ostr.h"
 
 class Log
 {
@@ -16,7 +17,7 @@ private:
 };
 
 // log macros
-#ifdef false
+#ifdef DEBUG
     #define TRACE(...) ::Log::GetLogger()->trace(__VA_ARGS__)
     #define INFO(...) ::Log::GetLogger()->info(__VA_ARGS__)
     #define WARN(...) ::Log::GetLogger()->warn(__VA_ARGS__)
