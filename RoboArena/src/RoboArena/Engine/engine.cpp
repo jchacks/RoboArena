@@ -1,6 +1,8 @@
 #include "rapch.h"
 #include "engine.h"
 
+#include <glm/gtx/optimum_pow.hpp>
+
 #include "RoboArena/core.h"
 #include "RoboArena/log.h"
 
@@ -8,14 +10,14 @@
 // Not sure that this should be here and if this module is not called in
 // PyObject *stop_name = PyUnicode_InternFromString("stop");
 
-bool test_circle_to_circle(const Vec2 c1, float r1, const Vec2 c2, float r2)
+bool test_circle_to_circle(const glm::vec2 &c1, float r1, const glm::vec2 &c2, float r2)
 {
-    return (c1 - c2).pow(2).sum() <= pow((r1 + r2), 2);
+    return glm::distance(c1, c2) <= (r1 + r2);
 };
 
-bool Engine::test_circle_oob(const Vec2 &c, const float r) const
+bool Engine::test_circle_oob(const glm::vec2 &c, const float r) const
 {
-    return !((r < c.x) & (c.x < size.x - r) & (r < c.y) & (c.y < size.y - r));
+    return !((r < c.x) & (c.x < m_size.x - r) & (r < c.y) & (c.y < m_size.y - r));
 };
 
 void Engine::add_robot(Robot& robot)
@@ -54,7 +56,6 @@ void Engine::collide_bullets()
                 TRACE("Bullet hit tank");
                 float power = (*it_bullet)->power;
                 it_robot->energy -= 4.0f * +((power >= 1) * 2.0f * (power - 1.0f));
-                delete *it_bullet;
                 bullets.erase(it_bullet);
                 break;
             }
@@ -76,6 +77,7 @@ void Engine::step()
         if (test_circle_oob(it_robot->position, Robot::RADIUS))
         {
             TRACE("Robot collided with wall.");
+            it_robot->position = glm::clamp(it_robot->position, glm::vec2(0.0,0.0), m_size);
         }
     }
 };

@@ -11,31 +11,31 @@ from libcpp.set cimport set
 from libc.stdlib cimport malloc, free
 from uuid import uuid4
 
-cdef extern from "vec2.h":
-    cdef cppclass Vec2:
-        float x,y
-        Vec2() except +
-        Vec2(float, float) except +
-        Vec2(float) except +
-        @staticmethod
-        Vec2 random(float, float)
-        Vec2 pow(float)
-        float sum()
-        float len()
-        void clip(Vec2, Vec2)
-        void clip(float,float,float,float)
-        Vec2 operator+(Vec2)
-        Vec2 operator-(Vec2)
-        Vec2 operator-(float)
-        Vec2 operator*(float)
-        Vec2 operator/(float)
-        # Vec2 &operator+=(Vec2)
-    float rand_float(float, float)
-    float clip(float,float,float)
+# cdef extern from "vec2.h":
+#     cdef cppclass Vec2:
+#         float x,y
+#         Vec2() except +
+#         Vec2(float, float) except +
+#         Vec2(float) except +
+#         @staticmethod
+#         Vec2 random(float, float)
+#         Vec2 pow(float)
+#         float sum()
+#         float len()
+#         void clip(Vec2, Vec2)
+#         void clip(float,float,float,float)
+#         Vec2 operator+(Vec2)
+#         Vec2 operator-(Vec2)
+#         Vec2 operator-(float)
+#         Vec2 operator*(float)
+#         Vec2 operator/(float)
+#         # Vec2 &operator+=(Vec2)
+#     float rand_float(float, float)
+#     float clip(float,float,float)
 
 
-cdef extern from "vec2.cpp":
-    pass
+# cdef extern from "vec2.cpp":
+#     pass
 
 
 cdef extern from "core.h":

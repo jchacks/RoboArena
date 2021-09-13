@@ -1,7 +1,9 @@
 #pragma once
-#include <Python.h>
+#include "rapch.h"
 
-#include "RoboArena/vec2.h"
+#include <Python.h>
+#include <glm/vec2.hpp>
+
 #include "RoboArena/log.h"
 
 #include "bullet.h"
@@ -11,12 +13,7 @@ class Engine
 {
 public:
     Engine(){};
-    Engine(Vec2 size) : size(size){};
-
-    Engine(float height, float width)
-    {
-        size = Vec2(width, height);
-    };
+    Engine(float width, float height) : m_size(width, height) {};
 
     void add_robot(Robot &robot);
     Robot& get_robot(int index);
@@ -26,9 +23,9 @@ public:
     void run(); // Is this needed?
 
 private:
-    Vec2 size;
+    glm::vec2 m_size;
     std::list<Robot> robots;
     std::set<Bullet *> bullets;
     void collide_bullets();
-    bool test_circle_oob(const Vec2 &c, const float r) const;
+    bool test_circle_oob(const glm::vec2 &c, const float r) const;
 };

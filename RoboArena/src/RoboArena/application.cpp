@@ -5,6 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
+
 Application::Application()
 {
     m_window = std::unique_ptr<Window>(Window::create());
@@ -16,7 +17,8 @@ Application::~Application()
 
 void Application::run()
 {
-    WindowResizeEvent wre = WindowResizeEvent(128,128);
+
+    WindowResizeEvent wre = WindowResizeEvent(128, 128);
     INFO(wre);
     while (m_running)
     {

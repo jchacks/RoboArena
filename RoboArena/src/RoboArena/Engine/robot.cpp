@@ -1,4 +1,5 @@
 #include "robot.h"
+#include "glm/gtx/rotate_vector.hpp"
 
 const float PI_2f32 = 2.0f * M_PIf32;
 
@@ -9,18 +10,14 @@ const float RADAR_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 
 const float ROBOT_RADIUS = 24;
 
-Bullet *Robot::fire()
+void Robot::fire(std::set<Bullet> &bullets)
 {
     heat = 1.0f + fire_power / 5.0f;
     energy = std::max(0.0f, energy - fire_power);
     should_fire = false;
-    Vec2 turret_direction = Vec2::from_rads(turret_rotation);
+    glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), turret_rotation);
     TRACE("Firing");
-    return new Bullet(
-        this,
-        position + turret_direction * 30.0f,
-        turret_direction * (20.0f - (3.0f * fire_power)),
-        fire_power);
+    bullets.emplace(this, position + turret_direction * 30.0f, turret_direction * (20.0f - (3.0f * fire_power)), fire_power);
 };
 
 const float Robot::RADIUS = 24;
@@ -28,8 +25,9 @@ const float Robot::RADIUS = 24;
 void Robot::step()
 {
     // PyObject_CallMethodObjArgs(scripted_robot, stop_name, NULL);
-    speed = clip(speed + get_acceleration(), -8.0f, 8.0f);
-    position = position + get_velocity();
+    speed = glm::clamp(speed + get_acceleration(), -8.0f, 8.0f);
+    auto velocity = glm::rotate(glm::vec2(speed, 0.0f), base_rotation);
+    position = position + velocity;
     float base_rotation_velocity =
         std::max(0.0f, (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(speed))) * (float)base_turning;
     // std::cout << "Rotation " << base_rotation << "Turning " << base_turning << "Rot Vel " << (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(velocity)) << std::endl;
@@ -40,10 +38,6 @@ void Robot::step()
     radar_rotation = std::remainderf(radar_rotation + radar_rotation_velocity, PI_2f32);
 };
 
-Vec2 Robot::get_velocity()
-{
-    return Vec2::from_rads(base_rotation) * speed;
-}
 
 float Robot::get_acceleration()
 {

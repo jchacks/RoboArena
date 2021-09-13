@@ -1,18 +1,18 @@
-#include "vec2.h"
+#include <glm/vec2.hpp>
 
 
 struct Rect
 {
-    Vec2 origin, width, height;
+    glm::vec2 origin, width, height;
 };
 
 struct Line
 {
-    Vec2 a, b;
+    glm::vec2 a, b;
 };
 
 struct Ray {
-    Vec2 origin, direction;
+    glm::vec2 origin, direction;
 };
 
-Vec2 intersect(Ray ray, Rect rect);
+glm::vec2 intersect(Ray ray, Rect rect);
