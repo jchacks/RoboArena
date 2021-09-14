@@ -9,8 +9,6 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include_directories = {}
 include_directories["Python"] = "/usr/include/python3.8/"
 include_directories["spdlog"] = "RoboArena//vendor/spdlog/include"
-include_directories["stduuid"] = "RoboArena/vendor/stduuid/include"
-include_directories["MGSL"] = "RoboArena/vendor/stduuid/gsl"
 include_directories["GLFW"] = "RoboArena/vendor/GLFW/include"
 include_directories["glm"] = "RoboArena/vendor/glm"
 
@@ -22,6 +20,7 @@ project "RoboArena"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
+    pic "On"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
@@ -33,15 +32,12 @@ project "RoboArena"
        "%{prj.location}/src/**.cpp"
     }
     defines {
-        "UUID_SYSTEM_GENERATOR",
 		"_CRT_SECURE_NO_WARNINGS",
 	}
 
     includedirs {
         "%{prj.location}/src",
         "%{include_directories.spdlog}",
-        "%{include_directories.stduuid}",
-        "%{include_directories.MGSL}",
         "%{include_directories.Python}",
         "%{include_directories.GLFW}",
         "%{include_directories.glm}",
@@ -64,10 +60,10 @@ project "RoboArena"
 
     filter "configurations:Python"
         kind "StaticLib"
-        defines { "NDEBUG" }
+        defines { "DEBUG" }
         optimize "On"
 
         postbuildcommands {
-            ("{COPY} %{cfg.buildtarget.relpath} ../PyRoboArena/lib"),
+            ("{COPY} %{cfg.buildtarget.relpath} ../PyRoboArena/lib/%{cfg.buildtarget.name}"),
             ("cd ../PyRoboArena && python setup.py build_ext --inplace"),
         }

@@ -17,12 +17,12 @@ ifeq ($(config),debug)
   OBJDIR = ../obj/Debug-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DUUID_SYSTEM_GENERATOR -D_CRT_SECURE_NO_WARNINGS -DDEBUG -DRA_ENABLE_ASSERTS
-  INCLUDES += -Isrc -Ivendor/spdlog/include -Ivendor/stduuid/include -Ivendor/stduuid/gsl -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DDEBUG -DRA_ENABLE_ASSERTS
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
   LDDEPS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
@@ -46,12 +46,12 @@ ifeq ($(config),release)
   OBJDIR = ../obj/Release-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DUUID_SYSTEM_GENERATOR -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -Ivendor/stduuid/include -Ivendor/stduuid/gsl -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
   LDDEPS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
@@ -75,12 +75,12 @@ ifeq ($(config),python)
   OBJDIR = ../obj/Python-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -DUUID_SYSTEM_GENERATOR -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -Ivendor/stduuid/include -Ivendor/stduuid/gsl -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DDEBUG
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
   LDDEPS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a
@@ -92,7 +92,7 @@ ifeq ($(config),python)
   endef
   define POSTBUILDCMDS
 	@echo Running postbuild commands
-	cp -rf ../bin/Python-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib
+	cp -rf ../bin/Python-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib/libRoboArena.a
 	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)

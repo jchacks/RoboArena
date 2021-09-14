@@ -1,83 +1,182 @@
 #include "rapch.h"
 #include "engine.h"
 
+#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 #include <glm/gtx/optimum_pow.hpp>
+#include <glm/gtx/component_wise.hpp>
+#include "glm/gtx/rotate_vector.hpp"
+#include <glm/gtc/random.hpp>
 
 #include "RoboArena/core.h"
 #include "RoboArena/log.h"
+#include "RoboArena/Engine/physics.h"
 
-// https://stackoverflow.com/questions/55302321/calling-a-python-class-method-from-c-if-given-an-initialised-class-as-pyobjec
-// Not sure that this should be here and if this module is not called in
-// PyObject *stop_name = PyUnicode_InternFromString("stop");
-
-bool test_circle_to_circle(const glm::vec2 &c1, float r1, const glm::vec2 &c2, float r2)
+void Engine::add_robot(const Robot &robot)
 {
-    return glm::distance(c1, c2) <= (r1 + r2);
+    TRACE("Adding robot.");
+    m_robots.push_back(std::move(robot));
 };
 
-bool Engine::test_circle_oob(const glm::vec2 &c, const float r) const
+Robot &Engine::get_robot(int index)
 {
-    return !((r < c.x) & (c.x < m_size.x - r) & (r < c.y) & (c.y < m_size.y - r));
-};
-
-void Engine::add_robot(Robot& robot)
-{
-    robots.push_back(robot);
-};
-
-Robot& Engine::get_robot(int index)
-{
-    auto it_robot = robots.begin();
+    auto it_robot = m_robots.begin();
     std::advance(it_robot, index);
     return *it_robot;
 };
 
-void Engine::collide_bullets()
+std::list<Robot> Engine::get_robots()
 {
-    std::set<Bullet *>::iterator it_bullet = bullets.begin();
-    while (it_bullet != bullets.end())
+    return m_robots;
+};
+
+std::list<Bullet> Engine::get_bullets()
+{
+    return m_bullets;
+};
+
+glm::vec2 Engine::get_size()
+{
+    return m_size;
+};
+
+float Engine::bullet_damage(Bullet &bullet)
+{
+    float power = bullet.power;
+    return 4.0f * power + ((power >= 1) * 2.0f * (power - 1.0f));
+}
+
+inline float rand_angle()
+{
+    glm::vec2 tmp = glm::circularRand(1);
+    return glm::atan(tmp.x, tmp.y);
+};
+
+void Engine::init()
+{
+    m_steps = 0;
+    m_bullets.clear();
+    for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
     {
-        // Test outofbounds
-        if (test_circle_oob((*it_bullet)->position, 3))
-        {
-            TRACE("Bullet hit wall");
-            delete *it_bullet;
-            bullets.erase(it_bullet);
-            it_bullet++;
-            continue;
-        }
-
-        // Test robot collisions
-        std::list<Robot>::iterator it_robot = robots.begin();
-        while (it_robot != robots.end())
-        {
-            if (test_circle_to_circle(it_robot->position, Robot::RADIUS, (*it_bullet)->position, 3))
-            {
-                TRACE("Bullet hit tank");
-                float power = (*it_bullet)->power;
-                it_robot->energy -= 4.0f * +((power >= 1) * 2.0f * (power - 1.0f));
-                bullets.erase(it_bullet);
-                break;
-            }
-        }
-
-        it_bullet++;
+        RobotParams params{
+            glm::linearRand(glm::vec2(0.0f, 0.0f), m_size),
+            rand_angle(),
+            rand_angle(),
+            rand_angle(),
+        };
+        it_robot->init(params);
     }
+}
+
+bool Engine::is_finished()
+{
+    int alive = 0;
+    for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
+        alive += (it_robot->energy > 0);
+    return alive > 0;
 };
 
 void Engine::step()
 {
-    collide_bullets();
-    for (auto it = bullets.begin(); it != bullets.end(); ++it)
-        (*it)->step();
-
-    for (auto it_robot = robots.begin(); it_robot != robots.end(); ++it_robot)
+    TRACE("Iterating Bullets. {}", m_bullets.size());
+    // Bullets
+    for (auto it_bullet = m_bullets.begin(); it_bullet != m_bullets.end();)
     {
-        it_robot->step();
-        if (test_circle_oob(it_robot->position, Robot::RADIUS))
+        Bullet &bullet = *it_bullet;
+        TRACE("Testing bullet {}", (long)(bullet.owner));
+        // Test outofbounds
+        if (test_circle_oob(bullet.position, 3, m_size))
         {
-            TRACE("Robot collided with wall.");
-            it_robot->position = glm::clamp(it_robot->position, glm::vec2(0.0,0.0), m_size);
+            TRACE("Bullet hit wall");
+            it_bullet = m_bullets.erase(it_bullet++);
+        }
+        else
+        {
+            TRACE("Testing Bullets to robots.");
+            // Test robot collisions
+            auto it_robot = m_robots.begin();
+            while (it_robot != m_robots.end())
+            {
+                Robot &robot = (*it_robot);
+                if (test_circle_to_circle(robot.position, Robot::RADIUS, bullet.position, 3))
+                {
+                    TRACE("Bullet {} hit {} from {}", bullet, robot.uid, bullet.owner->uid);
+                    robot.energy -= bullet_damage(bullet);
+                    bullet.owner->energy += 3 * bullet.power;
+                    m_bullets.erase(it_bullet++);
+                    continue;
+                }
+                it_robot++;
+            }
+            // If the bullet still exists step it
+            bullet.position += bullet.velocity;
+            it_bullet++;
         }
     }
+
+    TRACE("Iterating Robots for collisions.");
+    // Robots
+    for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
+    {
+        Robot &robot = (*it_robot);
+        for (auto it_other = m_robots.begin(); it_other != m_robots.end(); ++it_other)
+        {
+            Robot &other = (*it_other);
+            if (robot.uid == other.uid)
+                continue;
+            else if (test_circle_to_circle(robot.position, ROBOT_RADIUS, other.position, ROBOT_RADIUS))
+            {
+                robot.energy -= 0.6f;
+                other.energy -= 0.6f;
+                robot.speed = 0.0f;
+                other.speed = 0.0f;
+
+                glm::vec2 collisionNormal = robot.position - other.position;
+                // This handles the case when length == 0 internally
+                collisionNormal = glm::normalize(collisionNormal);
+
+                robot.position += collisionNormal;
+                other.position -= collisionNormal;
+
+                robot.on_hit_robot();
+                other.on_hit_robot();
+            }
+        }
+    }
+
+    TRACE("Iterating Robots for steps.");
+    for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
+    {
+        Robot &robot = (*it_robot);
+        robot.energy = glm::clamp(robot.energy, 0.0f, 100.0f);
+        if (robot.energy > 0)
+        {
+            robot.heat = std::max(0.0f, robot.heat - 0.1f);
+            // Collide walls
+            if (test_circle_oob(robot.position, Robot::RADIUS, m_size))
+            {
+                TRACE("Robot {} collided with wall.", (*it_robot));
+                robot.speed = 0.0f;
+                robot.energy -= std::max(std::abs(robot.speed) * 0.5f - 1.0f, 0.0f);
+                robot.position = glm::clamp(robot.position, glm::vec2(ROBOT_RADIUS), m_size - ROBOT_RADIUS);
+            }
+
+            robot.run();
+            robot.step();
+
+            if (robot.should_fire)
+            {
+                float fire_power = glm::clamp(fire_power, BULLET_MIN_POWER, BULLET_MAX_POWER);
+                robot.should_fire = false;
+                robot.heat = 1.0f + fire_power / 5.0f;
+                robot.energy = std::max(0.0f, robot.energy - fire_power);
+
+                glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), robot.turret_rotation);
+                glm::vec2 position = robot.position + turret_direction * 30.0f;
+                glm::vec2 velocity = turret_direction * (20.0f - (3.0f * fire_power));
+                m_bullets.emplace_back(&robot, position, velocity, fire_power);
+            }
+        }
+    }
+    m_steps += 1;
 };

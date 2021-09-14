@@ -7,7 +7,6 @@
 
 #include "RoboArena/application.h"
 
-
 int main(int argc, char **argv)
 {
 	Log::Init();
@@ -15,21 +14,30 @@ int main(int argc, char **argv)
 	int a = 5;
 	INFO("Hello! Var={0}", a);
 
-	auto app = new Application();
-	app->run();
-	delete app;
+	// auto app = new Application();
+	// app->run();
+	// delete app;
 
-	// Robot r1 = Robot();
-	// Robot r2 = Robot();
+	Robot r1 = Robot();
+	Robot r2 = Robot();
+	r1.should_fire = true;
+	TRACE("shouldfire {}", r1.should_fire);
 
-	// Engine eng = Engine();
-	// eng.add_robot(r1);
-	// eng.add_robot(r2);
-	// INFO("This is {0}", r1);
+	TRACE("TEST NUMBER_ROBOTS {}", NUMBER_ROBOTS);
+	Engine eng = Engine(600, 400);
+	eng.add_robot(r1);
+	eng.add_robot(r2);
+	TRACE("TEST NUMBER_ROBOTS {}", NUMBER_ROBOTS);
 
-	// for (int i = 0; i < 10; i++)
-	// {
-	// 	eng.step();
-	// 	INFO("This is {0}", eng.get_robot(0));
-	// }
+	eng.init();
+	INFO("This is {0}", r1);
+	INFO("This is {0}", r2);
+	TRACE("TEST NUMBER_ROBOTS {}", NUMBER_ROBOTS);
+
+	for (int i = 0; i < 1; i++)
+	{
+		eng.step();
+		INFO("This is {0}", eng.get_robot(0));
+	}
+	TRACE("TEST NUMBER_ROBOTS {}", NUMBER_ROBOTS);
 }

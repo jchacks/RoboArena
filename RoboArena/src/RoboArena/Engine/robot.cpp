@@ -1,5 +1,10 @@
 #include "robot.h"
+
 #include "glm/gtx/rotate_vector.hpp"
+
+// https://stackoverflow.com/questions/55302321/calling-a-python-class-method-from-c-if-given-an-initialised-class-as-pyobjec
+// Not sure that this should be here and if this module is not called in
+PyObject *run_name = PyUnicode_InternFromString("run");
 
 const float PI_2f32 = 2.0f * M_PIf32;
 
@@ -8,23 +13,31 @@ const float BASE_ROTATION_VELOCITY_DEC_RADS = 0.75 * M_PI / 180;
 const float TURRET_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 const float RADAR_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 
-const float ROBOT_RADIUS = 24;
+const float Robot::RADIUS = 24;
 
-void Robot::fire(std::set<Bullet> &bullets)
+void Robot::init(RobotParams &params)
 {
-    heat = 1.0f + fire_power / 5.0f;
-    energy = std::max(0.0f, energy - fire_power);
-    should_fire = false;
-    glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), turret_rotation);
-    TRACE("Firing");
-    bullets.emplace(this, position + turret_direction * 30.0f, turret_direction * (20.0f - (3.0f * fire_power)), fire_power);
+    position = params.position;
+    base_rotation = params.base_rotation;
+    turret_rotation = params.turret_rotation;
+    radar_rotation = params.radar_rotation;
+    energy = 100.0f;
+    TRACE("Initialised robot, [({},{}),{},{},{}].", position.x, position.y, base_rotation, turret_rotation, radar_rotation);
 };
 
-const float Robot::RADIUS = 24;
+Bullet Robot::fire()
+{
+    TRACE("{} Firing {}", uid, should_fire);
+    heat = 1.0f + fire_power / 5.0f;
+    energy = std::max(0.0f, energy - fire_power);
+    glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), turret_rotation);
+    Bullet bullet(this, position + turret_direction * 30.0f, turret_direction * (20.0f - (3.0f * fire_power)), fire_power);
+    should_fire = false;
+    return bullet;
+};
 
 void Robot::step()
 {
-    // PyObject_CallMethodObjArgs(scripted_robot, stop_name, NULL);
     speed = glm::clamp(speed + get_acceleration(), -8.0f, 8.0f);
     auto velocity = glm::rotate(glm::vec2(speed, 0.0f), base_rotation);
     position = position + velocity;
@@ -38,8 +51,7 @@ void Robot::step()
     radar_rotation = std::remainderf(radar_rotation + radar_rotation_velocity, PI_2f32);
 };
 
-
-float Robot::get_acceleration()
+inline float Robot::get_acceleration()
 {
     if (speed > 0.0f)
     {
@@ -59,4 +71,17 @@ float Robot::get_acceleration()
         return 1.0f;
     else
         return 0.0f;
+};
+
+void Robot::on_hit_robot()
+{
+    TRACE("on_hit_robot");
+};
+
+void Robot::run()
+{
+    TRACE("run");
+    // If a script is defined then get function and call
+    PyObject_CallMethodObjArgs(m_scripted_robot, run_name, NULL);
+    INFO("run");
 };
