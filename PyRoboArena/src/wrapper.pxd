@@ -1,80 +1,53 @@
 # distutils: language = c++
 
 cimport cython
+from libcpp.list cimport list as c_list
 from cpython.ref cimport PyObject
 
-from libcpp.set cimport set
-from libcpp.vector cimport vector
-from libcpp.list cimport list
-from libc.math cimport sin, cos, abs, pi, pow
-from libcpp.set cimport set
-from libc.stdlib cimport malloc, free
-from uuid import uuid4
-
-# cdef extern from "vec2.h":
-#     cdef cppclass Vec2:
-#         float x,y
-#         Vec2() except +
-#         Vec2(float, float) except +
-#         Vec2(float) except +
-#         @staticmethod
-#         Vec2 random(float, float)
-#         Vec2 pow(float)
-#         float sum()
-#         float len()
-#         void clip(Vec2, Vec2)
-#         void clip(float,float,float,float)
-#         Vec2 operator+(Vec2)
-#         Vec2 operator-(Vec2)
-#         Vec2 operator-(float)
-#         Vec2 operator*(float)
-#         Vec2 operator/(float)
-#         # Vec2 &operator+=(Vec2)
-#     float rand_float(float, float)
-#     float clip(float,float,float)
+cdef extern from "RoboArena/log.h":
+    cdef cppclass Log:
+        @staticmethod
+        void Init()
 
 
-# cdef extern from "vec2.cpp":
-#     pass
-
-
-cdef extern from "core.h":
+cdef extern from "RoboArena/Engine/bullet.h":
     cdef cppclass Bullet:
-        Robot* owner
-        Vec2 position, velocity
-        float power
-        Bullet()
-        Bullet(long, Vec2, Vec2, float)
-        void step()
+        vec2 position
+        vec2 velocity
+
+cdef extern from "RoboArena/Engine/robot.h":
+    cdef struct RobotParams:
+        vec2 position
+        float base_rotation, turret_rotation, radar_rotation
 
     cdef cppclass Robot:
-        PyObject* scripted_robot
-        unsigned long uid
-        int moving, base_turning, turret_turning, radar_turning
-        float energy, fire_power, speed, heat, base_rotation, turret_rotation, radar_rotation
         bint should_fire
-        Vec2 position
+        int moving, base_turning, turret_turning, radar_turning
+        vec2 position
+        float energy, fire_power, speed, heat, base_rotation, turret_rotation, radar_rotation
         Robot()
-        void step()
-        Vec2 get_velocity()
-        float get_acceleration()
-        Bullet* fire()
+        void set_python_script(PyObject*)
 
+cdef extern from "RoboArena/Engine/engine.h":
     cdef cppclass Engine:
-        Vec2 size
-        list robots
-        set bullets
         Engine()
-        Engine(Vec2)
+        Engine(float, float)
+        void init()
         void add_robot(Robot)
         void add_bullet(Bullet)
+        vec2 get_size()
+        c_list[Bullet] get_bullets()
+        c_list[Robot] get_robots()
+
+        bint is_finished()
         void step()
         void collide_bullets()
 
     cdef float ROBOT_RADIUS
     cdef float PI_2f32
 
-
-
-cdef extern from "core.cpp":
-    pass
+cdef extern from "glm/vec2.hpp" namespace "glm":
+    cdef cppclass vec2:
+        float x, y
+        vec2()
+        vec2(float,float)

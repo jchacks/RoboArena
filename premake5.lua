@@ -33,6 +33,7 @@ project "RoboArena"
        "%{prj.location}/src/**.cpp"
     }
     defines {
+        "UUID_SYSTEM_GENERATOR",
 		"_CRT_SECURE_NO_WARNINGS",
 	}
 

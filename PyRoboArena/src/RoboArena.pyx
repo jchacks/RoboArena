@@ -3,33 +3,25 @@
 cimport cython
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from wrapper cimport Vec2, Bullet, Robot, ROBOT_RADIUS, rand_float, Engine as CEngine, clip
+from wrapper cimport Bullet, Robot, ROBOT_RADIUS, Engine as CEngine, vec2, Log
 
-from libc.math cimport sin, cos, abs, pi, pow, pi
-from libcpp.set cimport set as c_set
-from libcpp.vector cimport vector
-from libcpp.list cimport list as c_list
-from libc.time cimport time,time_t
+from libc.math cimport sin, cos, pi
 from cpython.ref cimport PyObject
-import random
+
+from random import uniform
 import numpy as np
 
 ctypedef Bullet* BulletPtr
 ctypedef Robot* RobotPtr
 
-cdef bint test_circle_to_circle(const Vec2 c1, float r1, const Vec2 c2, float r2) :
-    return (c1 - c2).pow(2).sum() <= pow((r1 + r2),2)
-
+Log.Init()
 
 cdef class PyBullet:
     """
     Needed for rendering bullets.
     Maybe swap to a list of tuples...
     """
-    cdef BulletPtr c_bullet
-
-    def __dealloc__(self):
-        del self.c_bullet
+    cdef Bullet c_bullet
 
     @property
     def position(self):
@@ -40,13 +32,13 @@ cdef class PyBullet:
         return self.c_bullet.velocity.x, self.c_bullet.velocity.y
 
     @staticmethod
-    cdef PyBullet from_c(Bullet* c_bullet):
+    cdef PyBullet from_c(Bullet c_bullet):
         bullet:PyBullet = PyBullet()
         bullet.c_bullet = c_bullet
         return bullet
 
     def __repr__(self):
-        return f"Bullet<{<long>self.c_bullet}>({self.position})"
+        return f"Bullet({self.position})"
 
 
 cdef class PyRobot:
@@ -54,7 +46,7 @@ cdef class PyRobot:
 
     def __cinit__(self):
         self.c_robot = Robot()
-        self.c_robot.scripted_robot = <PyObject*>self
+        self.c_robot.set_python_script(<PyObject*>self)
 
     def __init__(self, base_color, turret_color=None, radar_color=None):
         self.base_color = base_color
@@ -62,10 +54,10 @@ cdef class PyRobot:
         self.radar_color = radar_color if radar_color is not None else base_color
 
     cpdef void _init(self, tuple size, dict params):
-        p = params.pop('position', (rand_float(0,1) * size[0], rand_float(0,1) * size[1]))
-        self.c_robot.position = Vec2(p[0],p[1])
-        self.c_robot.base_rotation = params.pop('base_rotation', rand_float(0,1) * pi * 2.0)
-        self.c_robot.turret_rotation = params.pop('turret_rotation', rand_float(0,1) * pi * 2.0)
+        p = params.pop('position', (uniform(0,1) * size[0], uniform(0,1) * size[1]))
+        self.c_robot.position = vec2(p[0],p[1])
+        self.c_robot.base_rotation = params.pop('base_rotation', uniform(0,1) * pi * 2.0)
+        self.c_robot.turret_rotation = params.pop('turret_rotation', uniform(0,1) * pi * 2.0)
         self.c_robot.radar_rotation = params.pop('radar_rotation', self.c_robot.turret_rotation)
         self.c_robot.energy = params.pop('energy', 100.0)
         self.init()
@@ -134,10 +126,6 @@ cdef class PyRobot:
         return self.c_robot.speed
 
     @property
-    def acceleration(self):
-        return self.c_robot.get_acceleration()
-
-    @property
     def base_rotation(self):
         return self.c_robot.base_rotation
 
@@ -177,8 +165,8 @@ cdef class PyRobot:
         self.c_robot.fire_power: float = fire_power
         self.c_robot.should_fire:bint = True
 
-    cpdef run(self):
-        pass
+    def run(self):
+        print("THIS IS THE CALL THAT IM NOT LOOKING FOR")
 
     cpdef on_hit_wall(self):
         pass
@@ -197,128 +185,40 @@ cdef class PyRobot:
             f",acceleration={self.acceleration},base_rotation={self.base_rotation})"
 
 
-cdef bint cirle_oob(const Vec2& c,const float r,const Vec2& size):
-    return not ((r < c.x) & (c.x < size.x - r) & (r < c.y) & (c.y < size.y - r))
-
-
 cdef class Engine:
-    cdef Vec2 c_size
-    cdef readonly list robots
-    cdef readonly set bullets
-    cdef readonly int steps
+    cdef CEngine c_engine
+    cdef public list robots
 
     def __init__(self, list robots, tuple size=(600,400), rate=-1 ):
-        self.c_size:Vec2 = Vec2(size[0], size[1])
+        self.c_engine : CEngine = CEngine(size[0], size[1])
         self.robots = robots
-        # Cleaned in init
-        self.bullets = set()
-        self.steps = 0
+        for robot in self.robots:
+            self.c_engine.add_robot(<Robot>((<PyRobot>robot).c_robot))
 
-    def is_finished(self) -> bool:
-        alive: int = 0
-        for py_robot in self.robots:
-            p_robot: &Robot = &(<PyRobot>py_robot).c_robot
-            if p_robot.energy > 0:
-                alive += 1
-        return alive <= 1
+    @property
+    def bullets(self):
+        bullet_list: c_list[Bullet] = self.c_engine.get_bullets()
+        return [PyBullet.from_c(bullet) for bullet in bullet_list]
 
     @property
     def size(self):
-        return (self.c_size.x, self.c_size.y)
+        s = self.c_engine.get_size()
+        return (s.x, s.y)
 
     def init(self):
-        self.steps = 0
-        self.bullets.clear()
+        self.c_engine.init()
         for py_robot in self.robots:
-            ptr_robot: &Robot = &((<PyRobot>py_robot).c_robot)
             # Call the init on the pyrobo
             params = self.init_robot(py_robot)
-            py_robot._init((self.c_size.x, self.c_size.y), params)
+            py_robot._init(self.size, params)
 
     cpdef dict init_robot(self, robot):
         """Init a robot attrs directly or return a dict for cattrs"""
         return {}
 
-    cdef void collide_bullets(self):
-        for py_bullet in self.bullets.copy():
-            p_bullet: BulletPtr = ((<PyBullet>py_bullet).c_bullet)
-
-            if cirle_oob(p_bullet.position, 3, self.c_size):
-                self.bullets.remove(py_bullet)
-                # No need to `del p_bullet` here as its handled in PyBullet
-                continue
-
-            for py_robot in self.robots:
-                ptr_robot: &Robot = &((<PyRobot>py_robot).c_robot)
-                if p_bullet.owner.uid != ptr_robot.uid:
-                    if test_circle_to_circle(ptr_robot.position, ROBOT_RADIUS, p_bullet.position, 3):
-                        power: float = p_bullet.power
-                        damage: float = 4 * power + (<float>(power >= 1) * 2 * (power - 1))
-                        ptr_robot.energy -= damage
-                        p_bullet.owner.energy += 3 * power
-                        (<PyRobot>p_bullet.owner.scripted_robot).on_bullet_hit(py_robot)
-                        py_robot.on_hit_by_bullet()
-                        self.bullets.remove(py_bullet)
-                        # No need to `del p_bullet` here as its handled in PyBullet
-                        break
-
-    cdef handle_wall_collision(self, p_robot: RobotPtr):
-        p_robot.speed = 0.0
-        p_robot.energy -= max(abs(p_robot.speed) * 0.5 - 1, 0)
-        p_robot.position.clip(Vec2(28.0), self.c_size - 28)
-
     def step(self):
-        for py_bullet in self.bullets:
-            p_bullet : BulletPtr = (<PyBullet>py_bullet).c_bullet
-            p_bullet.step()
+        print("CENGINE Step")
+        self.c_engine.step()
 
-        self.collide_bullets()
-
-        for r1 in self.robots:
-            p_robot1: &Robot = &(<PyRobot>r1).c_robot
-            for r2 in self.robots:
-                p_robot2: &Robot = &(<PyRobot>r2).c_robot
-
-                if p_robot1 == p_robot2:
-                    continue
-                elif test_circle_to_circle(p_robot1.position, ROBOT_RADIUS, p_robot2.position, ROBOT_RADIUS):
-                    p_robot1.energy -= 0.6
-                    p_robot2.energy -= 0.6
-                    p_robot1.speed = 0.0
-                    p_robot2.speed = 0.0
-
-                    n: Vec2 = p_robot1.position - p_robot2.position
-                    if n.sum() == 0:
-                        n = Vec2(0.0,1.0)
-                    n = n/n.len()
-
-                    p_robot1.position = p_robot1.position + n
-                    p_robot2.position = p_robot2.position - n
-                    r1.on_hit_robot(r2)
-                    r2.on_hit_robot(r1)
-
-        for py_robot in self.robots:
-            p_robot: &Robot = &(<PyRobot>py_robot).c_robot
-            p_robot.energy = clip(p_robot.energy, 0.0, 100.0)
-            if p_robot.energy > 0:
-                p_robot.step()
-
-                if cirle_oob(p_robot.position, 20, self.c_size):
-                    self.handle_wall_collision(p_robot)
-                    py_robot.on_hit_wall()
-
-                py_robot.run()
-
-                if p_robot.should_fire and (p_robot.heat <= 0.0):
-                    p_bullet: BulletPtr = p_robot.fire()
-                    self.bullets.add(PyBullet.from_c(p_bullet))
-
-                p_robot.heat = max(0, p_robot.heat - 0.1)
-        self.steps += 1
-
-
-cdef class WrappedEngine:
-    cdef CEngine c_engine
-
-    def __cinit__(self, tuple size=(600,400)):
-        self.c_engine = CEngine(Vec2(size[0], size[1]))
+    def is_finished(self):
+        self.c_engine.is_finished()

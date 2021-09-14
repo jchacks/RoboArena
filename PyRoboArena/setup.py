@@ -15,8 +15,9 @@ robo_arena = Extension(
     include_dirs=[
         "../RoboArena/src/",
         "../RoboArena/vendor/spdlog/include",
+        "../RoboArena/vendor/glm",
     ],
-    language="c++"
+    language="c++",
 )
 
 setup(
@@ -28,7 +29,11 @@ setup(
     url="https://github.com/jchacks/robots_c",
     author="jchacks",
     # license='MIT',
-    ext_modules=cythonize([robo_arena], annotate=True),
+    ext_modules=cythonize(
+        [robo_arena],
+        language_level="3",
+        annotate=True,
+    ),
     include_package_data=True,
     zip_safe=False,
 )
