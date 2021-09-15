@@ -14,7 +14,6 @@ const float BASE_ROTATION_VELOCITY_DEC_RADS = 0.75 * M_PI / 180;
 const float TURRET_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 const float RADAR_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 
-const float Robot::RADIUS = 24;
 
 void Robot::init(RobotParams &params)
 {
@@ -26,16 +25,6 @@ void Robot::init(RobotParams &params)
     TRACE("Initialised robot, [({},{}),{},{},{}].", position.x, position.y, base_rotation, turret_rotation, radar_rotation);
 };
 
-Bullet Robot::fire()
-{
-    TRACE("{} Firing {}", uid, should_fire);
-    heat = 1.0f + fire_power / 5.0f;
-    energy = std::max(0.0f, energy - fire_power);
-    glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), turret_rotation);
-    Bullet bullet(this, position + turret_direction * 30.0f, turret_direction * (20.0f - (3.0f * fire_power)), fire_power);
-    should_fire = false;
-    return bullet;
-};
 
 void Robot::step()
 {
@@ -79,7 +68,7 @@ void Robot::on_hit_robot()
 {
     if (m_scripted_robot)
     {
-        INFO("Found scripted robot @ {}\nRunning Python 'on_hit_robot' method brb...", (long)robot.m_scripted_robot);
+        INFO("Found scripted robot @ {}\nRunning Python 'on_hit_robot' method brb...", (long)m_scripted_robot);
         PyObject_CallMethodObjArgs(m_scripted_robot, on_hit_robot_name, NULL);
     }
 };
@@ -88,7 +77,7 @@ void Robot::run()
 {
     if (m_scripted_robot)
     {
-        INFO("Found scripted robot @ {}\nRunning Python 'run' method brb...", (long)robot.m_scripted_robot);
+        INFO("Found scripted robot @ {}\nRunning Python 'run' method brb...", (long)m_scripted_robot);
         PyObject_CallMethodObjArgs(m_scripted_robot, run_name, NULL);
     }
 };

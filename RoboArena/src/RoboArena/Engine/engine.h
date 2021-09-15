@@ -29,8 +29,7 @@ public:
     void run(); // Is this needed?
     bool is_finished();
 
-    virtual float bullet_damage(Bullet &bullet);
-    ;
+    float bullet_damage(Bullet &bullet);
 
 private:
     unsigned long m_steps = 0;

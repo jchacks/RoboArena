@@ -24,9 +24,10 @@ cdef extern from "RoboArena/Engine/robot.h":
         bint should_fire
         int moving, base_turning, turret_turning, radar_turning
         vec2 position
-        float energy, fire_power, speed, heat, base_rotation, turret_rotation, radar_rotation
+        float energy, speed, heat, base_rotation, turret_rotation, radar_rotation, m_fire_power
         Robot()
         void set_python_script(PyObject*)
+        void set_firepower(float)
 
 cdef extern from "RoboArena/Engine/engine.h":
     cdef cppclass Engine:

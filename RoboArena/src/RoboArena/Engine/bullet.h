@@ -3,8 +3,8 @@
 #include "glm/vec2.hpp"
 #include "RoboArena/log.h"
 
-const float BULLET_MAX_POWER = 3.0;
-const float BULLET_MIN_POWER = 0.1;
+const float BULLET_MAX_POWER = 3.0f;
+const float BULLET_MIN_POWER = 0.1f;
 
 class Bullet
 {

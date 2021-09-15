@@ -12,7 +12,6 @@ static unsigned long NUMBER_ROBOTS = 0;
 const float ROBOT_RADIUS = 24;
 
 class Engine;
-
 struct RobotParams
 {
     glm::vec2 position;
@@ -27,7 +26,7 @@ public:
     float energy, speed, base_rotation, turret_rotation, radar_rotation, heat;
     int moving, base_turning, turret_turning, radar_turning;
     bool should_fire;
-    float fire_power;
+    float m_fire_power;
     glm::vec2 position;
 
     Robot()
@@ -43,16 +42,23 @@ public:
           turret_turning(0),
           radar_turning(0),
           should_fire(false),
-          fire_power(0.0f),
+          m_fire_power(0.0f),
           position(glm::vec2(0.0f, 0.0f)),
-          uid(NUMBER_ROBOTS += 1)
+          m_uid(NUMBER_ROBOTS += 1)
     {
-        TRACE("Robot constructor {} {}", (long)this, uid);
+        TRACE("Robot constructor {} {}", (long)this, m_uid);
     };
 
     ~Robot()
     {
-        TRACE("Robot destructor {} {}", (long)this, uid);
+        TRACE("Robot destructor {} {}", (long)this, m_uid);
+    };
+
+    unsigned long get_uid() { return m_uid; };
+
+    void set_firepower(float fire_power)
+    {
+        m_fire_power = fire_power;
     };
 
     void set_python_script(PyObject *scripted_robot)
@@ -63,13 +69,11 @@ public:
 
 private:
     PyObject *m_scripted_robot = NULL;
-    static const float RADIUS;
-    unsigned long uid;
+    unsigned long m_uid;
 
 private:
     void init(RobotParams &params);
     void step();
-    Bullet fire();
     inline float get_acceleration();
     inline glm::vec2 get_velocity();
 
@@ -79,7 +83,7 @@ private:
 
     friend std::ostream &operator<<(std::ostream &strm, const Robot &r)
     {
-        return strm << "Robot[uid=" << r.uid << ",energy=" << r.energy << ",pos=" << r.position[0] << "," << r.position[1] << ",direction=" << r.base_rotation << "]";
+        return strm << "Robot[uid=" << r.m_uid << ",energy=" << r.energy << ",pos=" << r.position[0] << "," << r.position[1] << ",direction=" << r.base_rotation << "]";
     }
 
     friend Engine;

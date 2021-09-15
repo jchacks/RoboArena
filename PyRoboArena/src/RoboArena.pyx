@@ -56,10 +56,10 @@ cdef class PyRobot:
 
     @property
     def fire_power(self):
-        return self.c_robot.fire_power
+        return self.c_robot.m_fire_power
     @fire_power.setter
     def fire_power(self, fire_power):
-        self.c_robot.fire_power = fire_power
+        self.c_robot.m_fire_power = fire_power
 
     @property
     def moving(self):
@@ -135,7 +135,7 @@ cdef class PyRobot:
         return self.c_robot.heat/(1+3/5)
 
     def fire(self, float fire_power):
-        self.c_robot.fire_power: float = fire_power
+        self.c_robot.set_firepower(fire_power)
         self.c_robot.should_fire:bint = True
 
     def run(self):
@@ -144,13 +144,13 @@ cdef class PyRobot:
     cpdef on_hit_wall(self):
         pass
 
-    cpdef on_hit_robot(self, robot):
+    cpdef on_hit_robot(self,):
         pass
 
-    cpdef on_bullet_hit(self, robot):
+    cpdef on_bullet_hit(self):
         pass
 
-    cpdef on_hit_by_bullet(self, bullet):
+    cpdef on_hit_by_bullet(self):
         pass
 
     def __repr__(self):
@@ -193,8 +193,7 @@ cdef class Engine:
         return {}
 
     def step(self):
-        print("CENGINE Step")
         self.c_engine.step()
 
     def is_finished(self):
-        self.c_engine.is_finished()
+        return self.c_engine.is_finished()

@@ -60,7 +60,7 @@ project "RoboArena"
 
     filter "configurations:Python"
         kind "StaticLib"
-        defines { "DEBUG" }
+        defines { "NDEBUG" }
         optimize "On"
 
         postbuildcommands {

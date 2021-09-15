@@ -75,7 +75,7 @@ ifeq ($(config),python)
   OBJDIR = ../obj/Python-linux-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DDEBUG
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
   INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)

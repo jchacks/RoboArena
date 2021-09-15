@@ -78,26 +78,28 @@ bool Engine::is_finished()
     int alive = 0;
     for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
         alive += (it_robot->energy > 0);
-    return alive > 1;
+    return alive <= 1;
 };
 
 inline bool Engine::check_bullet_collisions(Bullet &bullet)
 {
-    TRACE("Testing bullet {}", (long)(bullet.owner));
     // Test outofbounds
     if (test_circle_oob(bullet.position, 3, m_size))
     {
-        TRACE("Bullet hit wall");
         return true;
     }
-    TRACE("Testing Bullets to robots.");
     // Test robot collisions
     for (auto it_robot = m_robots.begin(); it_robot != m_robots.end();)
     {
         Robot &robot = (*it_robot);
-        if (test_circle_to_circle(robot.position, Robot::RADIUS, bullet.position, 3))
+        if (test_circle_to_circle(robot.position, ROBOT_RADIUS, bullet.position, 3))
         {
-            TRACE("Bullet {} hit {} from {}", bullet, robot.uid, bullet.owner->uid);
+            TRACE("Bullet {} power:{} dmg:{}\n\thit {} \n\tfrom {}",
+                  bullet,
+                  bullet.power,
+                  bullet_damage(bullet),
+                  robot.get_uid(),
+                  bullet.owner->get_uid());
             robot.energy -= bullet_damage(bullet);
             bullet.owner->energy += 3 * bullet.power;
             return true;
@@ -116,6 +118,7 @@ void Engine::step()
         Bullet &bullet = *it_bullet;
         if (check_bullet_collisions(bullet))
         {
+            WARN("Deleting bullet {}", (long)&(*it_bullet));
             it_bullet = m_bullets.erase(it_bullet);
         }
         else
@@ -134,7 +137,7 @@ void Engine::step()
         for (auto it_other = m_robots.begin(); it_other != m_robots.end(); ++it_other)
         {
             Robot &other = (*it_other);
-            if (robot.uid == other.uid)
+            if (robot.get_uid() == other.get_uid())
                 continue;
             else if (test_circle_to_circle(robot.position, ROBOT_RADIUS, other.position, ROBOT_RADIUS))
             {
@@ -165,7 +168,7 @@ void Engine::step()
         {
             robot.heat = std::max(0.0f, robot.heat - 0.1f);
             // Collide walls
-            if (test_circle_oob(robot.position, Robot::RADIUS, m_size))
+            if (test_circle_oob(robot.position, ROBOT_RADIUS, m_size))
             {
                 TRACE("Robot {} collided with wall.", (*it_robot));
                 robot.speed = 0.0f;
@@ -178,10 +181,11 @@ void Engine::step()
 
             if (robot.should_fire & robot.heat <= 0)
             {
-                float fire_power = glm::clamp(fire_power, BULLET_MIN_POWER, BULLET_MAX_POWER);
+                float fire_power = std::min(std::max(robot.m_fire_power, BULLET_MIN_POWER), BULLET_MAX_POWER);
                 robot.should_fire = false;
                 robot.heat = 1.0f + fire_power / 5.0f;
-                robot.energy = robot.energy - fire_power;
+                robot.energy -= fire_power;
+                TRACE("robot.energy {}, {}", robot.energy, fire_power);
 
                 glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), robot.turret_rotation);
                 glm::vec2 position = robot.position + turret_direction * 30.0f;
