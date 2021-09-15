@@ -35,9 +35,10 @@ cdef extern from "RoboArena/Engine/engine.h":
         void init()
         void add_robot(Robot)
         void add_bullet(Bullet)
+        Robot& make_robot()
         vec2 get_size()
-        c_list[Bullet] get_bullets()
-        c_list[Robot] get_robots()
+        c_list[Bullet]& get_bullets()
+        c_list[Robot]& get_robots()
 
         bint is_finished()
         void step()

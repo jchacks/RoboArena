@@ -25,12 +25,17 @@ Robot &Engine::get_robot(int index)
     return *it_robot;
 };
 
-std::list<Robot> Engine::get_robots()
+Robot &Engine::make_robot()
+{
+    return m_robots.emplace_back();
+};
+
+std::list<Robot> &Engine::get_robots()
 {
     return m_robots;
 };
 
-std::list<Bullet> Engine::get_bullets()
+std::list<Bullet> &Engine::get_bullets()
 {
     return m_bullets;
 };
@@ -73,8 +78,34 @@ bool Engine::is_finished()
     int alive = 0;
     for (auto it_robot = m_robots.begin(); it_robot != m_robots.end(); ++it_robot)
         alive += (it_robot->energy > 0);
-    return alive > 0;
+    return alive > 1;
 };
+
+inline bool Engine::check_bullet_collisions(Bullet &bullet)
+{
+    TRACE("Testing bullet {}", (long)(bullet.owner));
+    // Test outofbounds
+    if (test_circle_oob(bullet.position, 3, m_size))
+    {
+        TRACE("Bullet hit wall");
+        return true;
+    }
+    TRACE("Testing Bullets to robots.");
+    // Test robot collisions
+    for (auto it_robot = m_robots.begin(); it_robot != m_robots.end();)
+    {
+        Robot &robot = (*it_robot);
+        if (test_circle_to_circle(robot.position, Robot::RADIUS, bullet.position, 3))
+        {
+            TRACE("Bullet {} hit {} from {}", bullet, robot.uid, bullet.owner->uid);
+            robot.energy -= bullet_damage(bullet);
+            bullet.owner->energy += 3 * bullet.power;
+            return true;
+        }
+        it_robot++;
+    }
+    return false;
+}
 
 void Engine::step()
 {
@@ -83,31 +114,12 @@ void Engine::step()
     for (auto it_bullet = m_bullets.begin(); it_bullet != m_bullets.end();)
     {
         Bullet &bullet = *it_bullet;
-        TRACE("Testing bullet {}", (long)(bullet.owner));
-        // Test outofbounds
-        if (test_circle_oob(bullet.position, 3, m_size))
+        if (check_bullet_collisions(bullet))
         {
-            TRACE("Bullet hit wall");
-            it_bullet = m_bullets.erase(it_bullet++);
+            it_bullet = m_bullets.erase(it_bullet);
         }
         else
         {
-            TRACE("Testing Bullets to robots.");
-            // Test robot collisions
-            auto it_robot = m_robots.begin();
-            while (it_robot != m_robots.end())
-            {
-                Robot &robot = (*it_robot);
-                if (test_circle_to_circle(robot.position, Robot::RADIUS, bullet.position, 3))
-                {
-                    TRACE("Bullet {} hit {} from {}", bullet, robot.uid, bullet.owner->uid);
-                    robot.energy -= bullet_damage(bullet);
-                    bullet.owner->energy += 3 * bullet.power;
-                    m_bullets.erase(it_bullet++);
-                    continue;
-                }
-                it_robot++;
-            }
             // If the bullet still exists step it
             bullet.position += bullet.velocity;
             it_bullet++;
@@ -164,12 +176,12 @@ void Engine::step()
             robot.run();
             robot.step();
 
-            if (robot.should_fire)
+            if (robot.should_fire & robot.heat <= 0)
             {
                 float fire_power = glm::clamp(fire_power, BULLET_MIN_POWER, BULLET_MAX_POWER);
                 robot.should_fire = false;
                 robot.heat = 1.0f + fire_power / 5.0f;
-                robot.energy = std::max(0.0f, robot.energy - fire_power);
+                robot.energy = robot.energy - fire_power;
 
                 glm::vec2 turret_direction = glm::rotate(glm::vec2(1.0f, 0.0), robot.turret_rotation);
                 glm::vec2 position = robot.position + turret_direction * 30.0f;

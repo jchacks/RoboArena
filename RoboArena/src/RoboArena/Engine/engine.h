@@ -1,7 +1,6 @@
 #pragma once
 #include "rapch.h"
 
-#include <Python.h>
 #include <glm/vec2.hpp>
 
 #include "RoboArena/log.h"
@@ -19,9 +18,10 @@ public:
 
     void add_robot(const Robot &robot);
     Robot &get_robot(int index);
+    Robot &make_robot();
 
-    std::list<Robot> get_robots();
-    std::list<Bullet> get_bullets();
+    std::list<Robot> &get_robots();
+    std::list<Bullet> &get_bullets();
     glm::vec2 get_size();
 
     void add_bullet(Bullet bullet);
@@ -30,12 +30,12 @@ public:
     bool is_finished();
 
     virtual float bullet_damage(Bullet &bullet);
-;
+    ;
 
 private:
     unsigned long m_steps = 0;
     glm::vec2 m_size;
     std::list<Robot> m_robots;
     std::list<Bullet> m_bullets;
-    void collide_bullets();
+    inline bool check_bullet_collisions(Bullet &);
 };

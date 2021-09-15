@@ -5,6 +5,7 @@
 // https://stackoverflow.com/questions/55302321/calling-a-python-class-method-from-c-if-given-an-initialised-class-as-pyobjec
 // Not sure that this should be here and if this module is not called in
 PyObject *run_name = PyUnicode_InternFromString("run");
+PyObject *on_hit_robot_name = PyUnicode_InternFromString("on_hit_robot");
 
 const float PI_2f32 = 2.0f * M_PIf32;
 
@@ -43,7 +44,6 @@ void Robot::step()
     position = position + velocity;
     float base_rotation_velocity =
         std::max(0.0f, (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(speed))) * (float)base_turning;
-    // std::cout << "Rotation " << base_rotation << "Turning " << base_turning << "Rot Vel " << (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(velocity)) << std::endl;
     base_rotation = std::remainderf(base_rotation + base_rotation_velocity, PI_2f32);
     float turret_rotation_velocity = TURRET_ROTATION_VELOCITY_RADS * turret_turning + base_rotation_velocity;
     turret_rotation = std::remainderf(turret_rotation + turret_rotation_velocity, PI_2f32);
@@ -73,15 +73,22 @@ inline float Robot::get_acceleration()
         return 0.0f;
 };
 
+//External scripted Python
+
 void Robot::on_hit_robot()
 {
-    TRACE("on_hit_robot");
+    if (m_scripted_robot)
+    {
+        INFO("Found scripted robot @ {}\nRunning Python 'on_hit_robot' method brb...", (long)robot.m_scripted_robot);
+        PyObject_CallMethodObjArgs(m_scripted_robot, on_hit_robot_name, NULL);
+    }
 };
 
 void Robot::run()
 {
-    TRACE("run");
-    // If a script is defined then get function and call
-    PyObject_CallMethodObjArgs(m_scripted_robot, run_name, NULL);
-    INFO("run");
+    if (m_scripted_robot)
+    {
+        INFO("Found scripted robot @ {}\nRunning Python 'run' method brb...", (long)robot.m_scripted_robot);
+        PyObject_CallMethodObjArgs(m_scripted_robot, run_name, NULL);
+    }
 };

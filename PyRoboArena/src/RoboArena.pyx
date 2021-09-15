@@ -5,6 +5,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 
 from wrapper cimport Bullet, Robot, ROBOT_RADIUS, Engine as CEngine, vec2, Log
 
+from libcpp.list cimport list as c_list
 from libc.math cimport sin, cos, pi
 from cpython.ref cimport PyObject
 
@@ -13,39 +14,19 @@ import numpy as np
 
 ctypedef Bullet* BulletPtr
 ctypedef Robot* RobotPtr
+ctypedef c_list[Bullet] BulletList
+ctypedef c_list[Bullet]* BulletListPtr
+ctypedef c_list[Bullet].iterator BulletListIter
 
 Log.Init()
 
-cdef class PyBullet:
-    """
-    Needed for rendering bullets.
-    Maybe swap to a list of tuples...
-    """
-    cdef Bullet c_bullet
-
-    @property
-    def position(self):
-        return self.c_bullet.position.x, self.c_bullet.position.y
-
-    @property
-    def velocity(self):
-        return self.c_bullet.velocity.x, self.c_bullet.velocity.y
-
-    @staticmethod
-    cdef PyBullet from_c(Bullet c_bullet):
-        bullet:PyBullet = PyBullet()
-        bullet.c_bullet = c_bullet
-        return bullet
-
-    def __repr__(self):
-        return f"Bullet({self.position})"
-
 
 cdef class PyRobot:
-    cdef Robot c_robot
+    cdef Robot* c_robot
 
-    def __cinit__(self):
-        self.c_robot = Robot()
+    cdef setup(self, c_robot: RobotPtr):
+        self.c_robot:Robot = c_robot
+        print("Setup python script")
         self.c_robot.set_python_script(<PyObject*>self)
 
     def __init__(self, base_color, turret_color=None, radar_color=None):
@@ -64,14 +45,6 @@ cdef class PyRobot:
 
     cpdef void init(self):
         pass
-
-    def hello(self):
-        print("Hello")
-
-    def stop(self):
-        self.moving = 0
-        self.base_turning = 0
-        self.turret_turning = 0
 
     # Writeable props
     @property
@@ -166,7 +139,7 @@ cdef class PyRobot:
         self.c_robot.should_fire:bint = True
 
     def run(self):
-        print("THIS IS THE CALL THAT IM NOT LOOKING FOR")
+        print("Error PyRobot.run is not implemented.")
 
     cpdef on_hit_wall(self):
         pass
@@ -182,23 +155,26 @@ cdef class PyRobot:
 
     def __repr__(self):
         return f"{self.__class__.__name__}(energy={self.energy}, position={self.position},speed={self.speed}"\
-            f",acceleration={self.acceleration},base_rotation={self.base_rotation})"
+            f",base_rotation={self.base_rotation})"
 
 
 cdef class Engine:
     cdef CEngine c_engine
     cdef public list robots
 
-    def __init__(self, list robots, tuple size=(600,400), rate=-1 ):
+    def __cinit__(self, list robots, tuple size=(600,400), rate=-1 ):
         self.c_engine : CEngine = CEngine(size[0], size[1])
         self.robots = robots
         for robot in self.robots:
-            self.c_engine.add_robot(<Robot>((<PyRobot>robot).c_robot))
+            _robot:PyRobot = <PyRobot>robot
+            _robot.setup(&self.c_engine.make_robot())
 
-    @property
-    def bullets(self):
-        bullet_list: c_list[Bullet] = self.c_engine.get_bullets()
-        return [PyBullet.from_c(bullet) for bullet in bullet_list]
+    def get_bullets(self):
+        r = []
+        blist : BulletList = ((<CEngine>self.c_engine).get_bullets())
+        for c_bullet in blist:
+            r.append((c_bullet.position.x, c_bullet.position.y))
+        return r
 
     @property
     def size(self):

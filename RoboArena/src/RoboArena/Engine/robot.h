@@ -24,7 +24,6 @@ struct RobotParams
 class Robot
 {
 public:
-    PyObject *m_scripted_robot = NULL;
     float energy, speed, base_rotation, turret_rotation, radar_rotation, heat;
     int moving, base_turning, turret_turning, radar_turning;
     bool should_fire;
@@ -51,23 +50,19 @@ public:
         TRACE("Robot constructor {} {}", (long)this, uid);
     };
 
-    Robot(const Robot &other)
-    {
-
-        TRACE("Robot copy constructor {} {}", (long)this, uid);
-    };
-
     ~Robot()
     {
         TRACE("Robot destructor {} {}", (long)this, uid);
     };
 
-    // void set_python_script(PyObject *scripted_robot)
-    // {
-    //     m_scripted_robot = scripted_robot;
-    // }
+    void set_python_script(PyObject *scripted_robot)
+    {
+        INFO("Scripted Robot address {}", (long)scripted_robot);
+        m_scripted_robot = scripted_robot;
+    };
 
 private:
+    PyObject *m_scripted_robot = NULL;
     static const float RADIUS;
     unsigned long uid;
 
