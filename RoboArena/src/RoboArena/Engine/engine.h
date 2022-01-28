@@ -23,6 +23,7 @@ public:
     std::list<Robot> &get_robots();
     std::list<Bullet> &get_bullets();
     glm::vec2 get_size();
+    unsigned long get_steps() { return m_steps; };
 
     void add_bullet(Bullet bullet);
     void step();
