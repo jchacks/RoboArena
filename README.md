@@ -6,7 +6,9 @@ A RoboCode inspired battle simulation written in C++, with python bindings writt
 
 We use `premake5` to build the project and related projects.
 
-### Linux
+Warning: `Python.h` headers are required and can be located anywhere (:, this project assumes that theyre located at `/usr/local/include/python3.8`.  If located somewhere else just add a symlink.
+
+### Linux/MacOS
 
 To generate the `Makefile`s run:
 

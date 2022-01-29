@@ -7,7 +7,7 @@
 PyObject *run_name = PyUnicode_InternFromString("run");
 PyObject *on_hit_robot_name = PyUnicode_InternFromString("on_hit_robot");
 
-const float PI_2f32 = 2.0f * M_PIf32;
+const float PI_2f32 = 2.0f * M_PI;
 
 const float BASE_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
 const float BASE_ROTATION_VELOCITY_DEC_RADS = 0.75 * M_PI / 180;

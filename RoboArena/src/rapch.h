@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include <math.h>
+#include <cmath>
 
 #include <iterator>
 #include <functional>

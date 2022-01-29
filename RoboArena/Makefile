@@ -11,22 +11,30 @@ endif
 .PHONY: clean prebuild prelink
 
 ifeq ($(config),debug)
-  RESCOMP = windres
-  TARGETDIR = ../bin/Debug-linux-x86_64/RoboArena
+  ifeq ($(origin CC), default)
+    CC = clang
+  endif
+  ifeq ($(origin CXX), default)
+    CXX = clang++
+  endif
+  ifeq ($(origin AR), default)
+    AR = ar
+  endif
+  TARGETDIR = ../bin/Debug-macosx-x86_64/RoboArena
   TARGET = $(TARGETDIR)/RoboArena
-  OBJDIR = ../obj/Debug-linux-x86_64/RoboArena
+  OBJDIR = ../obj/Debug-macosx-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DDEBUG -DRA_ENABLE_ASSERTS
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/local/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
-  LDDEPS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
+  LIBS += vendor/GLFW/bin/Debug-macosx-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Debug-macosx-x86_64/GLFW/libGLFW.a
+  ALL_LDFLAGS += $(LDFLAGS) -m64
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -40,22 +48,30 @@ all: prebuild prelink $(TARGET)
 endif
 
 ifeq ($(config),release)
-  RESCOMP = windres
-  TARGETDIR = ../bin/Release-linux-x86_64/RoboArena
+  ifeq ($(origin CC), default)
+    CC = clang
+  endif
+  ifeq ($(origin CXX), default)
+    CXX = clang++
+  endif
+  ifeq ($(origin AR), default)
+    AR = ar
+  endif
+  TARGETDIR = ../bin/Release-macosx-x86_64/RoboArena
   TARGET = $(TARGETDIR)/RoboArena
-  OBJDIR = ../obj/Release-linux-x86_64/RoboArena
+  OBJDIR = ../obj/Release-macosx-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/local/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
-  LDDEPS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
+  LIBS += vendor/GLFW/bin/Release-macosx-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Release-macosx-x86_64/GLFW/libGLFW.a
+  ALL_LDFLAGS += $(LDFLAGS) -m64
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -69,22 +85,30 @@ all: prebuild prelink $(TARGET)
 endif
 
 ifeq ($(config),python)
-  RESCOMP = windres
-  TARGETDIR = ../bin/Python-linux-x86_64/RoboArena
+  ifeq ($(origin CC), default)
+    CC = clang
+  endif
+  ifeq ($(origin CXX), default)
+    CXX = clang++
+  endif
+  ifeq ($(origin AR), default)
+    AR = ar
+  endif
+  TARGETDIR = ../bin/Python-macosx-x86_64/RoboArena
   TARGET = $(TARGETDIR)/libRoboArena.a
-  OBJDIR = ../obj/Python-linux-x86_64/RoboArena
+  OBJDIR = ../obj/Python-macosx-x86_64/RoboArena
   PCH = src/rapch.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DNDEBUG
-  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
+  INCLUDES += -Isrc -Ivendor/spdlog/include -I/usr/local/include/python3.8 -Ivendor/GLFW/include -Ivendor/glm
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
-  LDDEPS += vendor/GLFW/bin/Python-linux-x86_64/GLFW/libGLFW.a
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
+  LIBS += vendor/GLFW/bin/Python-macosx-x86_64/GLFW/libGLFW.a -lGL -ldl -lpthread
+  LDDEPS += vendor/GLFW/bin/Python-macosx-x86_64/GLFW/libGLFW.a
+  ALL_LDFLAGS += $(LDFLAGS) -m64
   LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -92,7 +116,7 @@ ifeq ($(config),python)
   endef
   define POSTBUILDCMDS
 	@echo Running postbuild commands
-	cp -rf ../bin/Python-linux-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib/libRoboArena.a
+	cp -rf ../bin/Python-macosx-x86_64/RoboArena/libRoboArena.a ../PyRoboArena/lib/libRoboArena.a
 	cd ../PyRoboArena && python setup.py build_ext --inplace
   endef
 all: prebuild prelink $(TARGET)

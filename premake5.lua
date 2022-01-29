@@ -7,8 +7,8 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 
 include_directories = {}
-include_directories["Python"] = "/usr/include/python3.8/"
-include_directories["spdlog"] = "RoboArena//vendor/spdlog/include"
+include_directories["Python"] = "/usr/local/include/python3.8/"
+include_directories["spdlog"] = "RoboArena/vendor/spdlog/include"
 include_directories["GLFW"] = "RoboArena/vendor/GLFW/include"
 include_directories["glm"] = "RoboArena/vendor/glm"
 

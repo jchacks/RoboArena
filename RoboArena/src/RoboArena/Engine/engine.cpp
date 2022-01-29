@@ -179,7 +179,7 @@ void Engine::step()
             robot.run();
             robot.step();
 
-            if (robot.should_fire & robot.heat <= 0)
+            if (robot.should_fire & (robot.heat <= 0))
             {
                 float fire_power = std::min(std::max(robot.m_fire_power, BULLET_MIN_POWER), BULLET_MAX_POWER);
                 robot.should_fire = false;
