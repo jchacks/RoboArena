@@ -9,11 +9,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include_directories = {}
 include_directories["Python"] = "/usr/local/include/python3.8/"
 include_directories["spdlog"] = "RoboArena/vendor/spdlog/include"
-include_directories["GLFW"] = "RoboArena/vendor/GLFW/include"
 include_directories["glm"] = "RoboArena/vendor/glm"
-
---Include other premake
-include "RoboArena/vendor/GLFW"
 
 project "RoboArena"
     location "RoboArena"
@@ -39,16 +35,19 @@ project "RoboArena"
         "%{prj.location}/src",
         "%{include_directories.spdlog}",
         "%{include_directories.Python}",
-        "%{include_directories.GLFW}",
         "%{include_directories.glm}",
     }
+    
 
     links {
-        "GLFW",
-        "GL",
         "dl",
         "pthread"
     }
+    filter "system:macosx"
+        links {"Python.framework"}
+        linkoptions {"-F /usr/local/Cellar/python@3.8/3.8.12_1/Frameworks"}
+        buildoptions {"-F /usr/local/Cellar/python@3.8/3.8.12_1/Frameworks"}
+
 
     filter "configurations:Debug"
         defines { "DEBUG", "RA_ENABLE_ASSERTS" }

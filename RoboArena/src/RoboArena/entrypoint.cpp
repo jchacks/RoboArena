@@ -5,7 +5,6 @@
 #include "RoboArena/Engine/engine.h"
 #include "RoboArena/Engine/robot.h"
 
-#include "RoboArena/application.h"
 
 int main(int argc, char **argv)
 {
@@ -13,10 +12,6 @@ int main(int argc, char **argv)
 	WARN("Initialized Log!");
 	int a = 5;
 	INFO("Hello! Var={0}", a);
-
-	// auto app = new Application();
-	// app->run();
-	// delete app;
 
 	Robot r1 = Robot();
 	Robot r2 = Robot();

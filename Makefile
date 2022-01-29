@@ -11,38 +11,28 @@ ifndef verbose
 endif
 
 ifeq ($(config),debug)
-  GLFW_config = debug
   RoboArena_config = debug
 endif
 ifeq ($(config),release)
-  GLFW_config = release
   RoboArena_config = release
 endif
 ifeq ($(config),python)
-  GLFW_config = python
   RoboArena_config = python
 endif
 
-PROJECTS := GLFW RoboArena
+PROJECTS := RoboArena
 
 .PHONY: all clean help $(PROJECTS) 
 
 all: $(PROJECTS)
 
-GLFW:
-ifneq (,$(GLFW_config))
-	@echo "==== Building GLFW ($(GLFW_config)) ===="
-	@${MAKE} --no-print-directory -C RoboArena/vendor/GLFW -f Makefile config=$(GLFW_config)
-endif
-
-RoboArena: GLFW
+RoboArena:
 ifneq (,$(RoboArena_config))
 	@echo "==== Building RoboArena ($(RoboArena_config)) ===="
 	@${MAKE} --no-print-directory -C RoboArena -f Makefile config=$(RoboArena_config)
 endif
 
 clean:
-	@${MAKE} --no-print-directory -C RoboArena/vendor/GLFW -f Makefile clean
 	@${MAKE} --no-print-directory -C RoboArena -f Makefile clean
 
 help:
@@ -56,7 +46,6 @@ help:
 	@echo "TARGETS:"
 	@echo "   all (default)"
 	@echo "   clean"
-	@echo "   GLFW"
 	@echo "   RoboArena"
 	@echo ""
 	@echo "For more information, see https://github.com/premake/premake-core/wiki"

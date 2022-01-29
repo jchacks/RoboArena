@@ -1,3 +1,4 @@
+from distutils.command.build_ext import build_ext
 from os import path
 from setuptools import setup, Extension
 from Cython.Build import cythonize
@@ -8,8 +9,8 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 
 robo_arena = Extension(
-    "RoboArena",
-    sources=["src/RoboArena.pyx"],
+    "RoboArena.core.core",
+    sources=["RoboArena/core/core.pyx"],
     libraries=["RoboArena"],
     library_dirs=["lib"],
     include_dirs=[
@@ -18,6 +19,7 @@ robo_arena = Extension(
         "../RoboArena/vendor/glm",
     ],
     language="c++",
+    extra_compile_args=['-std=c++17', '-v'],
 )
 
 setup(
@@ -26,7 +28,7 @@ setup(
     description="Robocode python clone",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jchacks/robots_c",
+    url="https://github.com/jchacks/RoboArena",
     author="jchacks",
     # license='MIT',
     ext_modules=cythonize(
@@ -34,6 +36,7 @@ setup(
         language_level="3",
         annotate=True,
     ),
+    packages=['RoboArena'],
     include_package_data=True,
     zip_safe=False,
 )

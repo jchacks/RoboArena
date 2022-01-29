@@ -2,6 +2,7 @@
 #  editor
 .idea/
 .vscode/
+.DS_Store
 
 #  build
 build/

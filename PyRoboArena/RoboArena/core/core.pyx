@@ -3,7 +3,7 @@
 cimport cython
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from wrapper cimport Bullet, Robot, ROBOT_RADIUS, Engine as CEngine, vec2, Log
+from .wrapper cimport Bullet, Robot, ROBOT_RADIUS, Engine as CEngine, vec2, Log
 
 from libcpp.list cimport list as c_list
 from libc.math cimport sin, cos, pi
@@ -175,6 +175,10 @@ cdef class Engine:
         for c_bullet in blist:
             r.append((c_bullet.position.x, c_bullet.position.y))
         return r
+
+    @property
+    def bullets(self):
+        return self.get_bullets()
 
     @property
     def size(self):
