@@ -37,7 +37,7 @@ project "RoboArena"
         "%{include_directories.Python}",
         "%{include_directories.glm}",
     }
-    
+
 
     links {
         "dl",

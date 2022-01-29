@@ -12,7 +12,7 @@ class Colors(object):
     CYAN = C = (0, 255, 255)
     MAGENTA = M = (255, 0, 255)
     YELLOW = Y = (255, 255, 0)
-    ORANGE = O = (255, 128, 0)
+    ORANGE = O = (255, 128, 0)  # noqa
     LIME = L = (128, 255, 0)
 
 
@@ -42,8 +42,6 @@ def rot_center(image, rect, rads):
 def scale_image(image, rect, factor):
     """rotate an image while keeping its center"""
     size = image.get_size()
-    scale_image = pygame.transform.scale(
-        image, (int(round(size[0] * factor)), int(round(size[1] * factor)))
-    )
+    scale_image = pygame.transform.scale(image, (int(round(size[0] * factor)), int(round(size[1] * factor))))
     scale_rect = scale_image.get_rect(center=rect.center)
     return scale_image, scale_rect

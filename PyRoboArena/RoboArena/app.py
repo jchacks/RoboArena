@@ -4,7 +4,7 @@ import pygame
 import os
 import time
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 
 os.environ["SDL_VIDEO_CENTERED"] = "0"
@@ -29,7 +29,7 @@ class Battle(object):
     def set_tick_rate(self, rate):
         print(f"Set rate to {rate} steps/s")
         rate = float(rate)
-        self.interval = 1/rate
+        self.interval = 1 / rate
 
     def step(self):
         if self.running:

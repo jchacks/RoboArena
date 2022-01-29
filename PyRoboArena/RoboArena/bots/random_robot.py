@@ -1,5 +1,3 @@
-
-   
 import random
 
 from RoboArena.core import PyRobot
@@ -18,5 +16,5 @@ class RandomRobot(PyRobot):
             self.turn_left(random.randint(0, 360))
             if random.randint(0, 1):
                 self.fire(random.randint(1, 3))
-        except:
+        except Exception:
             pass

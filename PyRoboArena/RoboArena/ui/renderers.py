@@ -141,7 +141,7 @@ class RobotRenderer(Renderer):
             self.draw_radar(surface, robot)
 
     def draw_radar(self, surface, robot):
-        rads = robot.radar_rotation 
+        rads = robot.radar_rotation
         image, rect = self.orig_sprites[robot][0]
         image, rect = rot_center(image, rect, rads - (math.pi / 2))
         rect.center = robot.position

@@ -1,4 +1,3 @@
-from distutils.command.build_ext import build_ext
 from os import path
 from setuptools import setup, Extension
 from Cython.Build import cythonize
@@ -19,7 +18,7 @@ robo_arena = Extension(
         "../RoboArena/vendor/glm",
     ],
     language="c++",
-    extra_compile_args=['-std=c++17', '-v'],
+    extra_compile_args=["-std=c++17", "-v"],
 )
 
 setup(
@@ -36,7 +35,7 @@ setup(
         language_level="3",
         annotate=True,
     ),
-    packages=['RoboArena'],
+    packages=["RoboArena"],
     include_package_data=True,
     zip_safe=False,
 )
