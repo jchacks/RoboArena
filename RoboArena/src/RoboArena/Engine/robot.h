@@ -20,6 +20,13 @@ struct RobotParams
     float radar_rotation;
 };
 
+const float PI_2f32 = 2.0f * M_PI;
+
+const float BASE_ROTATION_VELOCITY_RADS = 10 * M_PI / 180;
+const float BASE_ROTATION_VELOCITY_DEC_RADS = 0.75 * M_PI / 180;
+const float TURRET_ROTATION_VELOCITY_RADS = 20 * M_PI / 180;
+const float RADAR_ROTATION_VELOCITY_RADS = 45 * M_PI / 180;
+
 class Robot
 {
 public:
@@ -55,6 +62,14 @@ public:
     };
 
     unsigned long get_uid() { return m_uid; };
+    inline float get_base_rotation_velocity()
+    {
+        return std::max(0.0f,
+                        (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(speed))) *
+               (float)base_turning;
+    };
+    inline float get_turret_rotation_velocity() { return TURRET_ROTATION_VELOCITY_RADS * (float)turret_turning; };
+    inline float get_radar_rotation_velocity() { return RADAR_ROTATION_VELOCITY_RADS * (float)radar_turning; };
 
     void set_firepower(float fire_power)
     {

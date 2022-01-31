@@ -8,6 +8,7 @@ from .wrapper cimport Bullet, Robot, ROBOT_RADIUS, Engine as CEngine, vec2, Log
 from libcpp.list cimport list as c_list
 from libc.math cimport sin, cos, pi
 from cpython.ref cimport PyObject
+from dataclasses import dataclass
 
 from random import uniform
 import numpy as np
@@ -19,6 +20,15 @@ ctypedef c_list[Bullet]* BulletListPtr
 ctypedef c_list[Bullet].iterator BulletListIter
 
 Log.Init()
+
+# Replace with RobotParams
+@dataclass
+class InitalState:
+    position: Tuple[float, float] = None
+    energy: float = None
+    base_rotation: float = None
+    turret_rotation: float = None
+    radar_rotation: float = None
 
 
 cdef class PyRobot:
@@ -34,17 +44,8 @@ cdef class PyRobot:
         self.turret_color = turret_color if turret_color is not None else base_color
         self.radar_color = radar_color if radar_color is not None else base_color
 
-    cpdef void _init(self, tuple size, dict params):
-        p = params.pop('position', (uniform(0,1) * size[0], uniform(0,1) * size[1]))
-        self.c_robot.position = vec2(p[0],p[1])
-        self.c_robot.base_rotation = params.pop('base_rotation', uniform(0,1) * pi * 2.0)
-        self.c_robot.turret_rotation = params.pop('turret_rotation', uniform(0,1) * pi * 2.0)
-        self.c_robot.radar_rotation = params.pop('radar_rotation', self.c_robot.turret_rotation)
-        self.c_robot.energy = params.pop('energy', 100.0)
-        self.init()
-
-    cpdef void init(self):
-        pass
+    def init(self):
+        return InitalState()
 
     # Writeable props
     @property
@@ -97,6 +98,18 @@ cdef class PyRobot:
     @property
     def speed(self):
         return self.c_robot.speed
+
+    @property
+    def base_rotation_velocity(self):
+        return self.c_robot.get_base_rotation_velocity()
+
+    @property
+    def turret_rotation_velocity(self):
+        return self.c_robot.get_turret_rotation_velocity()
+
+    @property
+    def radar_rotation_velocity(self):
+        return self.c_robot.get_radar_rotation_velocity()
 
     @property
     def base_rotation(self):
@@ -185,16 +198,19 @@ cdef class Engine:
         s = self.c_engine.get_size()
         return (s.x, s.y)
 
-    def init(self):
+    cpdef void init(self):
         self.c_engine.init()
-        for py_robot in self.robots:
+        for robot in self.robots:
+            _robot:PyRobot = <PyRobot>robot
             # Call the init on the pyrobo
-            params = self.init_robot(py_robot)
-            py_robot._init(self.size, params)
+            state = _robot.init()
+            position = state.position or (uniform(0,1) * self.size[0], uniform(0,1) * self.size[1])
+            _robot.c_robot.position = vec2(position[0],position[1])
+            _robot.c_robot.base_rotation = state.base_rotation or uniform(0,1) * pi * 2.0
+            _robot.c_robot.turret_rotation = state.turret_rotation or uniform(0,1) * pi * 2.0
+            _robot.c_robot.radar_rotation = state.radar_rotation or _robot.c_robot.turret_rotation
+            _robot.c_robot.energy = state.energy or 100.0
 
-    cpdef dict init_robot(self, robot):
-        """Init a robot attrs directly or return a dict for cattrs"""
-        return {}
 
     def step(self):
         self.c_engine.step()

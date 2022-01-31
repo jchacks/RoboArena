@@ -4,3 +4,5 @@
 # generated file types
 *.html
 *.cpp
+
+__pycache__/

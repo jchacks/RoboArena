@@ -4,6 +4,7 @@ import pygame
 from abc import abstractmethod
 import math
 from RoboArena.ui.utils import load_image, rot_center
+from typing import Callable
 
 data_dir = os.path.join(os.path.dirname(__file__), "../../data/")
 
@@ -41,7 +42,8 @@ class BulletRenderer(Renderer):
         self.draw_trajectories = draw_trajectories
 
     def render(self, surface):
-        for item in self.items.copy():
+        items = self.items() if isinstance(self.items, Callable) else self.items.copy()
+        for item in items:
             try:
                 # if self.draw_trajectories:
                 #     pygame.draw.line(surface, Colors.Y, item.position, item.position + item.velocity * 1000)

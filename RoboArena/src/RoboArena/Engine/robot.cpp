@@ -7,14 +7,6 @@
 PyObject *run_name = PyUnicode_InternFromString("run");
 PyObject *on_hit_robot_name = PyUnicode_InternFromString("on_hit_robot");
 
-const float PI_2f32 = 2.0f * M_PI;
-
-const float BASE_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
-const float BASE_ROTATION_VELOCITY_DEC_RADS = 0.75 * M_PI / 180;
-const float TURRET_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
-const float RADAR_ROTATION_VELOCITY_RADS = 5 * M_PI / 180;
-
-
 void Robot::init(RobotParams &params)
 {
     position = params.position;
@@ -31,12 +23,11 @@ void Robot::step()
     speed = glm::clamp(speed + get_acceleration(), -8.0f, 8.0f);
     auto velocity = glm::rotate(glm::vec2(speed, 0.0f), base_rotation);
     position = position + velocity;
-    float base_rotation_velocity =
-        std::max(0.0f, (BASE_ROTATION_VELOCITY_RADS - BASE_ROTATION_VELOCITY_DEC_RADS * std::abs(speed))) * (float)base_turning;
+    float base_rotation_velocity = get_base_rotation_velocity();
     base_rotation = std::remainderf(base_rotation + base_rotation_velocity, PI_2f32);
-    float turret_rotation_velocity = TURRET_ROTATION_VELOCITY_RADS * turret_turning + base_rotation_velocity;
+    float turret_rotation_velocity = get_turret_rotation_velocity() + base_rotation_velocity;
     turret_rotation = std::remainderf(turret_rotation + turret_rotation_velocity, PI_2f32);
-    float radar_rotation_velocity = RADAR_ROTATION_VELOCITY_RADS * radar_turning + turret_rotation_velocity;
+    float radar_rotation_velocity = get_radar_rotation_velocity() + turret_rotation_velocity;
     radar_rotation = std::remainderf(radar_rotation + radar_rotation_velocity, PI_2f32);
 };
 

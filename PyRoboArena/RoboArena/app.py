@@ -26,6 +26,9 @@ class Battle(object):
         self.interval = 0.0
         self.next_sim = 0.0
 
+    def bullets(self):
+        return self.eng.get_bullets()
+
     def set_tick_rate(self, rate):
         print(f"Set rate to {rate} steps/s")
         rate = float(rate)

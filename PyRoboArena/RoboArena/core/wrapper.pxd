@@ -28,6 +28,9 @@ cdef extern from "RoboArena/Engine/robot.h":
         Robot()
         void set_python_script(PyObject*)
         void set_firepower(float)
+        float get_base_rotation_velocity()
+        float get_turret_rotation_velocity()
+        float get_radar_rotation_velocity()
 
 cdef extern from "RoboArena/Engine/engine.h":
     cdef cppclass Engine:
